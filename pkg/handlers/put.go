@@ -3,19 +3,19 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/Ubivius/microservice-template/pkg/data"
+	"github.com/Ubivius/microservice-friendslist/pkg/data"
 )
 
-// UpdateProducts updates the product with the ID specified in the received JSON product
-func (productHandler *ProductsHandler) UpdateProducts(responseWriter http.ResponseWriter, request *http.Request) {
-	product := request.Context().Value(KeyProduct{}).(*data.Product)
-	productHandler.logger.Println("Handle PUT product", product.ID)
+// UpdateRelationships updates the relationship with the ID specified in the received JSON relationship
+func (relationshipHandler *RelationshipsHandler) UpdateRelationships(responseWriter http.ResponseWriter, request *http.Request) {
+	relationship := request.Context().Value(KeyRelationship{}).(*data.Relationship)
+	relationshipHandler.logger.Println("Handle PUT relationship", relationship.ID)
 
-	// Update product
-	err := data.UpdateProduct(product)
-	if err == data.ErrorProductNotFound {
-		productHandler.logger.Println("[ERROR} product not found", err)
-		http.Error(responseWriter, "Product not found", http.StatusNotFound)
+	// Update relationship
+	err := data.UpdateRelationship(relationship)
+	if err == data.ErrorRelationshipNotFound {
+		relationshipHandler.logger.Println("[ERROR} relationship not found", err)
+		http.Error(responseWriter, "Relationship not found", http.StatusNotFound)
 		return
 	}
 

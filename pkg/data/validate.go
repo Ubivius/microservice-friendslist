@@ -1,35 +1,41 @@
 package data
 
 import (
-	"regexp"
+	"fmt"
 
 	"github.com/go-playground/validator"
 )
 
-// The current setup works well with a single struct to validate
-// The struct to validate should be passed as an interface in the future and the errors should be handled as individual error strings
-// For further information see :
-// Validator library : https://github.com/go-playground/validator
-// Nic Jackson episode : https://github.com/nicholasjackson/building-microservices-youtube/blob/episode_7/product-api/data/validation.go
+// ErrorInvalidRelationshipType : Invalid RelationshipType specific error
+var ErrorInvalidRelationshipType = fmt.Errorf("Invalid RelationshipType")
 
-// ValidateProduct a product with json validation and customer SKU validator
-func (product *Product) ValidateProduct() error {
+// ValidateRelationship a relationship with json validation and customer SKU validator
+func (relationship *Relationship) ValidateRelationship() error {
 	validate := validator.New()
-	err := validate.RegisterValidation("sku", validateSKU)
-	if err != nil {
-		// Panic if we get this error, that means we are not validating input
-		// This will be handled in a better way once we move the JSON validation to accept an interface
-		panic(err)
+	err1 := validate.RegisterValidation("exist", validateExist)
+	errRelationshipType := validate.RegisterValidation("isRelationshipType", validateIsRelationshipType)
+	if err1 != nil {
+		panic(err1)
+	} else if errRelationshipType != nil {
+		panic(ErrorInvalidRelationshipType)
 	}
-
-	return validate.Struct(product)
+	
+	return validate.Struct(relationship)
 }
 
-// Custom SKU validator
-func validateSKU(fieldLevel validator.FieldLevel) bool {
-	// sku is of format abc-absd-dfsdf
-	re := regexp.MustCompile(`[a-z]+-[a-z]+-[a-z]+`)
-	matches := re.FindAllString(fieldLevel.Field().String(), -1)
+// validates the user exist
+func validateExist(fieldLevel validator.FieldLevel) bool {
+	// validation of the UserID with a call to microservice-user 
+	return true
+}
 
-	return len(matches) == 1
+// validates the relationship type is valid
+func validateIsRelationshipType(fieldLevel validator.FieldLevel) bool {
+	relationshipType := int(fieldLevel.Field().Int())
+
+	if relationshipType < int(None) || relationshipType > int(PendingOutgoing) {
+		return false
+	}
+
+	return true
 }

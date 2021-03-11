@@ -3,14 +3,14 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/Ubivius/microservice-template/pkg/data"
+	"github.com/Ubivius/microservice-friendslist/pkg/data"
 )
 
-// AddProduct creates a new product from the received JSON
-func (productHandler *ProductsHandler) AddProduct(responseWriter http.ResponseWriter, request *http.Request) {
-	productHandler.logger.Println("Handle POST Product")
-	product := request.Context().Value(KeyProduct{}).(*data.Product)
+// AddRelationship creates a new relationship from the received JSON
+func (relationshipHandler *RelationshipsHandler) AddRelationship(responseWriter http.ResponseWriter, request *http.Request) {
+	relationshipHandler.logger.Println("Handle POST Relationship")
+	relationship := request.Context().Value(KeyRelationship{}).(*data.Relationship)
 
-	data.AddProduct(product)
+	data.AddRelationship(relationship)
 	responseWriter.WriteHeader(http.StatusNoContent)
 }

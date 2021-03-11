@@ -4,39 +4,53 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/Ubivius/microservice-template/pkg/data"
+	"github.com/Ubivius/microservice-friendslist/pkg/data"
 )
 
-// GetProducts returns the full list of products
-func (productHandler *ProductsHandler) GetProducts(responseWriter http.ResponseWriter, request *http.Request) {
-	productHandler.logger.Println("Handle GET products")
-	productList := data.GetProducts()
-	err := json.NewEncoder(responseWriter).Encode(productList)
-	if err != nil {
-		productHandler.logger.Println("[ERROR] serializing product", err)
-		http.Error(responseWriter, "Unable to marshal json", http.StatusInternalServerError)
-	}
-}
+// GetFriendsListByUserID returns all the relationships of a user from the database
+func (relationshipHandler *RelationshipsHandler) GetFriendsListByUserID(responseWriter http.ResponseWriter, request *http.Request) {
+	id := getUserID(request)
 
-// GetProductByID returns a single product from the database
-func (productHandler *ProductsHandler) GetProductByID(responseWriter http.ResponseWriter, request *http.Request) {
-	id := getProductID(request)
+	relationshipHandler.logger.Println("[DEBUG] getting friends list for userID", id)
 
-	productHandler.logger.Println("[DEBUG] getting id", id)
-
-	product, err := data.GetProductByID(id)
+	friends, err := data.GetFriendsListByUserID(id)
 	switch err {
 	case nil:
-		err = json.NewEncoder(responseWriter).Encode(product)
+		err = json.NewEncoder(responseWriter).Encode(friends)
 		if err != nil {
-			productHandler.logger.Println("[ERROR] serializing product", err)
+			relationshipHandler.logger.Println("[ERROR] serializing friends", err)
 		}
-	case data.ErrorProductNotFound:
-		productHandler.logger.Println("[ERROR] fetching product", err)
-		http.Error(responseWriter, "Product not found", http.StatusBadRequest)
+	case data.ErrorRelationshipNotFound:
+		relationshipHandler.logger.Println("[ERROR] fetching friends", err)
+		http.Error(responseWriter, "Friends not found", http.StatusBadRequest)
 		return
 	default:
-		productHandler.logger.Println("[ERROR] fetching product", err)
+		relationshipHandler.logger.Println("[ERROR] fetching friends", err)
+		http.Error(responseWriter, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+}
+
+// GetInvitesListByUserID returns all the invites of a user from the database
+func (relationshipHandler *RelationshipsHandler) GetInvitesListByUserID(responseWriter http.ResponseWriter, request *http.Request) {
+	id := getUserID(request)
+
+	relationshipHandler.logger.Println("[DEBUG] getting invites list for userID", id)
+
+	invites, err := data.GetInvitesListByUserID(id)
+	switch err {
+	case nil:
+		err = json.NewEncoder(responseWriter).Encode(invites)
+		if err != nil {
+			relationshipHandler.logger.Println("[ERROR] serializing invites", err)
+		}
+	case data.ErrorRelationshipNotFound:
+		relationshipHandler.logger.Println("[ERROR] fetching invites", err)
+		http.Error(responseWriter, "Invites not found", http.StatusBadRequest)
+		return
+	default:
+		relationshipHandler.logger.Println("[ERROR] fetching invites", err)
 		http.Error(responseWriter, err.Error(), http.StatusInternalServerError)
 		return
 	}
