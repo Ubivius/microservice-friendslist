@@ -24,8 +24,8 @@ const (
 // Formatting done with json tags to the right. "-" : don't include when encoding to json
 type Relationship struct {
 	ID          	int     `json:"id"`
-	User1      		User  	`json:"user1"`
-	User2 			User	`json:"user2"`
+	User1      		User  	`json:"user1" validate:"dive,required"`
+	User2 			User	`json:"user2" validate:"dive,required"`
 	ConversationID 	int 	`json:"conversationid"`
 	CreatedOn   	string  `json:"-"`
 	UpdatedOn   	string  `json:"-"`
@@ -34,7 +34,7 @@ type Relationship struct {
 
 // User in a relationship
 type User struct {
-	UserID      		int  	     		`json:"userid" validate:"required,exist"`
+	UserID      		int  	     		`json:"userid" validate:"required,userExist"`
 	RelationshipType	RelationshipType	`json:"relationshiptype" validate:"required,isRelationshipType"`
 }
 
@@ -126,6 +126,18 @@ func findIndexByRelationshipID(id int) int {
 		}
 	}
 	return -1
+}
+
+// Returns an bool when a relationship with the two users is found
+func relationshipExist(id1 int, id2 int) bool {
+	var exist = false
+	for _ , relationship := range relationshipList {
+		if (relationship.User1.UserID == id1 || relationship.User1.UserID == id2) &&
+		(relationship.User2.UserID == id1 || relationship.User2.UserID == id2){
+			exist = true
+		}
+	}
+	return exist
 }
 
 func getConversationID() int {
