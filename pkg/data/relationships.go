@@ -42,7 +42,7 @@ type User struct {
 type Relationships []*Relationship
 
 // GetFriendsListByUserID returns a list of friends for the given user id
-func GetFriendsListByUserID(id int) ([]*int, error) {
+func GetFriendsListByUserID(id int) (Relationships, error) {
 	friendsList := findFriendsListByUserID(id)
 	if len(friendsList) == 0 {
 		return nil, ErrorRelationshipNotFound
@@ -51,7 +51,7 @@ func GetFriendsListByUserID(id int) ([]*int, error) {
 }
 
 // GetInvitesListByUserID returns returns a list of friends invites for the given user id
-func GetInvitesListByUserID(id int) ([]*int, error) {
+func GetInvitesListByUserID(id int) (Relationships, error) {
 	invitesList := findInvitesListByUserID(id)
 	if len(invitesList) == 0 {
 		return nil, ErrorRelationshipNotFound
@@ -72,6 +72,7 @@ func UpdateRelationship(relationship *Relationship) error {
 // AddRelationship creates a new relationship
 func AddRelationship(relationship *Relationship) {
 	relationship.ID = getNextID()
+	relationship.ConversationID = getConversationID()
 	relationshipList = append(relationshipList, relationship)
 }
 
@@ -90,13 +91,13 @@ func DeleteRelationship(id int) error {
 
 // Returns an array of friends in the database
 // Returns -1 when no relationship is found
-func findFriendsListByUserID(id int) []*int {
-	var friendsList []*int
+func findFriendsListByUserID(id int) Relationships {
+	var friendsList Relationships
 	for _ , relationship := range relationshipList {
 		if relationship.User1.UserID == id && relationship.User1.RelationshipType == Friend {
-			friendsList = append(friendsList, &relationship.User2.UserID)
+			friendsList = append(friendsList, relationship)
 		}else if relationship.User2.UserID == id && relationship.User2.RelationshipType == Friend{
-			friendsList = append(friendsList, &relationship.User1.UserID)
+			friendsList = append(friendsList, relationship)
 		}
 	}
 	return friendsList
@@ -104,13 +105,13 @@ func findFriendsListByUserID(id int) []*int {
 
 // Returns an array of friends invites in the database
 // Returns -1 when no relationship is found
-func findInvitesListByUserID(id int) []*int {
-	var invitesList []*int
+func findInvitesListByUserID(id int) Relationships {
+	var invitesList Relationships
 	for _ , relationship := range relationshipList {
 		if relationship.User1.UserID == id && relationship.User1.RelationshipType == PendingIncoming {
-			invitesList = append(invitesList, &relationship.User2.UserID)
+			invitesList = append(invitesList, relationship)
 		}else if relationship.User2.UserID == id && relationship.User2.RelationshipType == PendingIncoming{
-			invitesList = append(invitesList, &relationship.User1.UserID)
+			invitesList = append(invitesList, relationship)
 		}
 	}
 	return invitesList
@@ -125,6 +126,11 @@ func findIndexByRelationshipID(id int) int {
 		}
 	}
 	return -1
+}
+
+func getConversationID() int {
+	// Call to the text-chat microservice to create a conversation and get the ID
+	return len(relationshipList) + 1
 }
 
 //////////////////////////////////////////////////////////////////////////////
