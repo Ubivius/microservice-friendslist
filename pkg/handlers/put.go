@@ -13,7 +13,11 @@ func (relationshipHandler *RelationshipsHandler) UpdateRelationships(responseWri
 
 	// Update relationship
 	err := data.UpdateRelationship(relationship)
-	if err == data.ErrorSameUserID {
+	if err == data.ErrorUserNotFound {
+		relationshipHandler.logger.Println("[ERROR} a userID doesn't exist", err)
+		http.Error(responseWriter, "A UserID doesn't exist", http.StatusBadRequest)
+		return
+	}else if err == data.ErrorSameUserID {
 		relationshipHandler.logger.Println("[ERROR} users in the relationship with same userID", err)
 		http.Error(responseWriter, "Users in the relationship with same userID", http.StatusBadRequest)
 		return

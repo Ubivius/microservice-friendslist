@@ -14,6 +14,9 @@ var ErrorSameUserID = fmt.Errorf("Can't create a relationship with two users wit
 // ErrorRelationshipExist : Invalid Relationship specific error
 var ErrorRelationshipExist = fmt.Errorf("A relationship with these two users already exists")
 
+// ErrorUserNotFound : User specific errors
+var ErrorUserNotFound = fmt.Errorf("UserID doesn't exist")
+
 // RelationshipType of a relationship
 type RelationshipType int
 
@@ -71,7 +74,7 @@ func UpdateRelationship(relationship *Relationship) error {
 	if index == -1 {
 		return ErrorRelationshipNotFound
 	}
-	
+
 	err := validateRelationship(relationship)
 	if err != nil {
 		return err
@@ -145,9 +148,13 @@ func findIndexByRelationshipID(id int) int {
 
 // validates a relationship
 func validateRelationship(relationship *Relationship) error {
+	if !validateUserExist(relationship.User1.UserID) || !validateUserExist(relationship.User2.UserID){
+		return ErrorUserNotFound
+	}
 	if relationship.User1.UserID == relationship.User2.UserID {
 		return ErrorSameUserID
-	}else if relationshipExist(relationship.ID, relationship.User1.UserID, relationship.User2.UserID){
+	}
+	if relationshipExist(relationship.ID, relationship.User1.UserID, relationship.User2.UserID){
 		return ErrorRelationshipExist
 	}
 	return nil
