@@ -8,6 +8,12 @@ import (
 // ErrorRelationshipNotFound : Relationship specific errors
 var ErrorRelationshipNotFound = fmt.Errorf("Relationship not found")
 
+// ErrorSameUserID : Invalid Relationship specific error
+var ErrorSameUserID = fmt.Errorf("Can't build a relationship with the same UserID")
+
+// ErrorRelationshipExist : Invalid Relationship specific error
+var ErrorRelationshipExist = fmt.Errorf("A relationship with these two users already exists")
+
 // RelationshipType of a relationship
 type RelationshipType int
 
@@ -34,7 +40,7 @@ type Relationship struct {
 
 // User in a relationship
 type User struct {
-	UserID      		int  	     		`json:"userid" validate:"required,userExist"`
+	UserID      		int  	     		`json:"userid" validate:"required"`
 	RelationshipType	RelationshipType	`json:"relationshiptype" validate:"required,isRelationshipType"`
 }
 
@@ -61,6 +67,11 @@ func GetInvitesListByUserID(id int) (Relationships, error) {
 
 // UpdateRelationship updates the relationship specified in received JSON
 func UpdateRelationship(relationship *Relationship) error {
+	err := validateRelationship(relationship)
+	if err != nil {
+		return err
+	}
+
 	index := findIndexByRelationshipID(relationship.ID)
 	if index == -1 {
 		return ErrorRelationshipNotFound
@@ -70,10 +81,14 @@ func UpdateRelationship(relationship *Relationship) error {
 }
 
 // AddRelationship creates a new relationship
-func AddRelationship(relationship *Relationship) {
-	relationship.ID = getNextID()
-	relationship.ConversationID = getConversationID()
-	relationshipList = append(relationshipList, relationship)
+func AddRelationship(relationship *Relationship) error {
+	err := validateRelationship(relationship)
+	if err == nil {
+		relationship.ID = getNextID()
+		relationship.ConversationID = getConversationID()
+		relationshipList = append(relationshipList, relationship)
+	}
+	return err
 }
 
 // DeleteRelationship deletes the relationship with the given id
@@ -83,7 +98,6 @@ func DeleteRelationship(id int) error {
 		return ErrorRelationshipNotFound
 	}
 
-	// This should not work, probably needs ':' after index+1. To test
 	relationshipList = append(relationshipList[:index], relationshipList[index+1:]...)
 
 	return nil
@@ -128,16 +142,32 @@ func findIndexByRelationshipID(id int) int {
 	return -1
 }
 
+// validates a relationship
+func validateRelationship(relationship *Relationship) error {
+	if relationship.User1.UserID == relationship.User2.UserID {
+		return ErrorSameUserID
+	}else if relationshipExist(relationship.ID, relationship.User1.UserID, relationship.User2.UserID){
+		return ErrorRelationshipExist
+	}
+	return nil
+}
+
+// validates the user exist
+func validateUserExist(userID int) bool {
+	// validation of the UserID with a call to microservice-user 
+	return true
+}
+
 // Returns an bool when a relationship with the two users is found
-func relationshipExist(id1 int, id2 int) bool {
-	var exist = false
+func relationshipExist(id int, userid1 int, userid2 int) bool {
 	for _ , relationship := range relationshipList {
-		if (relationship.User1.UserID == id1 || relationship.User1.UserID == id2) &&
-		(relationship.User2.UserID == id1 || relationship.User2.UserID == id2){
-			exist = true
+		if relationship.ID != id &&
+		(relationship.User1.UserID == userid1 || relationship.User1.UserID == userid2) &&
+		(relationship.User2.UserID == userid1 || relationship.User2.UserID == userid2){
+			return true
 		}
 	}
-	return exist
+	return false
 }
 
 func getConversationID() int {
