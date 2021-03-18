@@ -35,7 +35,7 @@ func TestGetExistingFriendsListByUserID(t *testing.T) {
 	if response.Code != http.StatusOK {
 		t.Errorf("Expected status code %d but got : %d", http.StatusOK, response.Code)
 	}
-	if !strings.Contains(response.Body.String(), "\"userid\":1") && !strings.Contains(response.Body.String(), "\"relationshiptype\":1") {
+	if !strings.Contains(response.Body.String(), "\"user_id\":1") && !strings.Contains(response.Body.String(), "\"relationship_type\":1") {
 		t.Error("Missing elements from expected results")
 	}
 }
@@ -79,7 +79,7 @@ func TestGetExistingInvitesListByUserID(t *testing.T) {
 	if response.Code != http.StatusOK {
 		t.Errorf("Expected status code %d but got : %d", http.StatusOK, response.Code)
 	}
-	if !strings.Contains(response.Body.String(), "\"userid\":2") && !strings.Contains(response.Body.String(), "\"relationshiptype\":3") {
+	if !strings.Contains(response.Body.String(), "\"user_id\":2") && !strings.Contains(response.Body.String(), "\"relationship_type\":3") {
 		t.Error("Missing elements from expected results")
 	}
 }
