@@ -22,23 +22,22 @@ type RelationshipType int
 
 // relationship type of a friend request
 const (
-    None RelationshipType = iota  // user has no intrinsic relationship
-    Friend						  // user is a friend
-    Blocked						  // user is blocked
+	None RelationshipType = iota  // user has no intrinsic relationship
+	Friend						  // user is a friend
+	Blocked						  // user is blocked
 	PendingIncoming				  // user has a pending incoming friend request to connected user
 	PendingOutgoing				  // current user has a pending outgoing friend request to user
 )
 
 // Relationship defines the structure for an API relationship.
-// Formatting done with json tags to the right. "-" : don't include when encoding to json
 type Relationship struct {
-	ID          	int     `json:"id"`
-	User1      		User  	`json:"user1"`
-	User2 			User	`json:"user2"`
+	ID				int     `json:"id"`
+	User1			User  	`json:"user1"`
+	User2			User	`json:"user2"`
 	ConversationID 	int 	`json:"conversationid"`
-	CreatedOn   	string  `json:"-"`
-	UpdatedOn   	string  `json:"-"`
-	DeletedOn   	string  `json:"-"`
+	CreatedOn		string  `json:"-"`
+	UpdatedOn		string  `json:"-"`
+	DeletedOn		string  `json:"-"`
 }
 
 // User in a relationship
@@ -114,7 +113,7 @@ func findFriendsListByUserID(id int) Relationships {
 	for _ , relationship := range relationshipList {
 		if relationship.User1.UserID == id && relationship.User1.RelationshipType == Friend {
 			friendsList = append(friendsList, relationship)
-		}else if relationship.User2.UserID == id && relationship.User2.RelationshipType == Friend{
+		} else if relationship.User2.UserID == id && relationship.User2.RelationshipType == Friend{
 			friendsList = append(friendsList, relationship)
 		}
 	}
@@ -128,7 +127,7 @@ func findInvitesListByUserID(id int) Relationships {
 	for _ , relationship := range relationshipList {
 		if relationship.User1.UserID == id && relationship.User1.RelationshipType == PendingIncoming {
 			invitesList = append(invitesList, relationship)
-		}else if relationship.User2.UserID == id && relationship.User2.RelationshipType == PendingIncoming{
+		} else if relationship.User2.UserID == id && relationship.User2.RelationshipType == PendingIncoming{
 			invitesList = append(invitesList, relationship)
 		}
 	}

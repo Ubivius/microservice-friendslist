@@ -9,7 +9,7 @@ import (
 // ErrorInvalidRelationshipType : Invalid RelationshipType specific error
 var ErrorInvalidRelationshipType = fmt.Errorf("Invalid RelationshipType")
 
-// ValidateRelationship a relationship with json validation and customer SKU validator
+// ValidateRelationship a relationship with json validation
 func (relationship *Relationship) ValidateRelationship() error {
 	validate := validator.New()
 
