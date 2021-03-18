@@ -38,7 +38,7 @@ func getRelationshipID(request *http.Request) int {
 // We panic if it is not valid because that means gorilla is failing
 func getUserID(request *http.Request) int {
 	vars := mux.Vars(request)
-	userID, err := strconv.Atoi(vars["userid"])
+	userID, err := strconv.Atoi(vars["user_id"])
 	if err != nil {
 		panic(err)
 	}

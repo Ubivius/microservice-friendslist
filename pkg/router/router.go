@@ -14,8 +14,8 @@ func New(relationshipHandler *handlers.RelationshipsHandler, logger *log.Logger)
 
 	// Get Router
 	getRouter := router.Methods(http.MethodGet).Subrouter()
-	getRouter.HandleFunc("/friends/{userid:[0-9]+}", relationshipHandler.GetFriendsListByUserID)
-	getRouter.HandleFunc("/invites/{userid:[0-9]+}", relationshipHandler.GetInvitesListByUserID)
+	getRouter.HandleFunc("/friends/{user_id:[0-9]+}", relationshipHandler.GetFriendsListByUserID)
+	getRouter.HandleFunc("/invites/{user_id:[0-9]+}", relationshipHandler.GetInvitesListByUserID)
 
 	// Put router
 	putRouter := router.Methods(http.MethodPut).Subrouter()

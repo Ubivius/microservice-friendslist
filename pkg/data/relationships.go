@@ -22,28 +22,28 @@ type RelationshipType int
 
 // relationship type of a friend request
 const (
-	None RelationshipType = iota  // user has no intrinsic relationship
-	Friend						  // user is a friend
-	Blocked						  // user is blocked
-	PendingIncoming				  // user has a pending incoming friend request to connected user
-	PendingOutgoing				  // current user has a pending outgoing friend request to user
+	None RelationshipType = iota	// user has no intrinsic relationship
+	Friend							// user is a friend
+	Blocked							// user is blocked
+	PendingIncoming					// user has a pending incoming friend request to connected user
+	PendingOutgoing					// current user has a pending outgoing friend request to user
 )
 
 // Relationship defines the structure for an API relationship.
 type Relationship struct {
-	ID				int     `json:"id"`
-	User1			User  	`json:"user1"`
-	User2			User	`json:"user2"`
-	ConversationID 	int 	`json:"conversationid"`
-	CreatedOn		string  `json:"-"`
-	UpdatedOn		string  `json:"-"`
-	DeletedOn		string  `json:"-"`
+	ID				int		`json:"id"`
+	User1			User	`json:"user_1"`
+	User2			User	`json:"user_2"`
+	ConversationID 	int 	`json:"conversation_id"`
+	CreatedOn		string	`json:"-"`
+	UpdatedOn		string	`json:"-"`
+	DeletedOn		string	`json:"-"`
 }
 
 // User in a relationship
 type User struct {
-	UserID      		int  	     		`json:"userid" validate:"required"`
-	RelationshipType	RelationshipType	`json:"relationshiptype" validate:"required,isRelationshipType"`
+	UserID      		int  	     		`json:"user_id" validate:"required"`
+	RelationshipType	RelationshipType	`json:"relationship_type" validate:"required,isRelationshipType"`
 }
 
 // Relationships is a collection of Relationship

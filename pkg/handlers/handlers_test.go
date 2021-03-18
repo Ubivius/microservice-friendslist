@@ -26,7 +26,7 @@ func TestGetExistingFriendsListByUserID(t *testing.T) {
 
 	// Mocking gorilla/mux vars
 	vars := map[string]string{
-		"userid": "1",
+		"user_id": "1",
 	}
 	request = mux.SetURLVars(request, vars)
 
@@ -48,7 +48,7 @@ func TestGetNonExistingFriendsListByUserID(t *testing.T) {
 
 	// Mocking gorilla/mux vars
 	vars := map[string]string{
-		"userid": "2",
+		"user_id": "2",
 	}
 	request = mux.SetURLVars(request, vars)
 
@@ -70,7 +70,7 @@ func TestGetExistingInvitesListByUserID(t *testing.T) {
 
 	// Mocking gorilla/mux vars
 	vars := map[string]string{
-		"userid": "2",
+		"user_id": "2",
 	}
 	request = mux.SetURLVars(request, vars)
 
@@ -92,7 +92,7 @@ func TestGetNonExistingInvitesListByUserID(t *testing.T) {
 
 	// Mocking gorilla/mux vars
 	vars := map[string]string{
-		"userid": "3",
+		"user_id": "3",
 	}
 	request = mux.SetURLVars(request, vars)
 
