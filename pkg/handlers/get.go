@@ -22,7 +22,7 @@ func (relationshipHandler *RelationshipsHandler) GetFriendsListByUserID(response
 		}
 	case data.ErrorRelationshipNotFound:
 		relationshipHandler.logger.Println("[ERROR] fetching friends", err)
-		http.Error(responseWriter, "Friends not found", http.StatusBadRequest)
+		http.Error(responseWriter, "Friends not found", http.StatusNotFound)
 		return
 	default:
 		relationshipHandler.logger.Println("[ERROR] fetching friends", err)
@@ -47,7 +47,7 @@ func (relationshipHandler *RelationshipsHandler) GetInvitesListByUserID(response
 		}
 	case data.ErrorRelationshipNotFound:
 		relationshipHandler.logger.Println("[ERROR] fetching invites", err)
-		http.Error(responseWriter, "Invites not found", http.StatusBadRequest)
+		http.Error(responseWriter, "Invites not found", http.StatusNotFound)
 		return
 	default:
 		relationshipHandler.logger.Println("[ERROR] fetching invites", err)

@@ -13,12 +13,12 @@ func (relationshipHandler *RelationshipsHandler) AddRelationship(responseWriter 
 
 	err := data.AddRelationship(relationship)
 	if err == data.ErrorSameUserID {
-		relationshipHandler.logger.Println("[ERROR} users with same userID", err)
-		http.Error(responseWriter, "Users with same userID", http.StatusNotFound)
+		relationshipHandler.logger.Println("[ERROR} users in the relationship with same userID", err)
+		http.Error(responseWriter, "Users in the relationship with same userID", http.StatusBadRequest)
 		return
 	}else if err == data.ErrorRelationshipExist {
 		relationshipHandler.logger.Println("[ERROR} relationship already exist", err)
-		http.Error(responseWriter, "Relationship already exist", http.StatusNotFound)
+		http.Error(responseWriter, "Relationship already exist", http.StatusBadRequest)
 		return
 	}
 

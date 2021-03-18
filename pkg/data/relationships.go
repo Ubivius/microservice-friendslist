@@ -9,7 +9,7 @@ import (
 var ErrorRelationshipNotFound = fmt.Errorf("Relationship not found")
 
 // ErrorSameUserID : Invalid Relationship specific error
-var ErrorSameUserID = fmt.Errorf("Can't build a relationship with the same UserID")
+var ErrorSameUserID = fmt.Errorf("Can't create a relationship with two users with the same userID")
 
 // ErrorRelationshipExist : Invalid Relationship specific error
 var ErrorRelationshipExist = fmt.Errorf("A relationship with these two users already exists")
@@ -30,8 +30,8 @@ const (
 // Formatting done with json tags to the right. "-" : don't include when encoding to json
 type Relationship struct {
 	ID          	int     `json:"id"`
-	User1      		User  	`json:"user1" validate:"dive,required"`
-	User2 			User	`json:"user2" validate:"dive,required"`
+	User1      		User  	`json:"user1"`
+	User2 			User	`json:"user2"`
 	ConversationID 	int 	`json:"conversationid"`
 	CreatedOn   	string  `json:"-"`
 	UpdatedOn   	string  `json:"-"`
@@ -67,15 +67,16 @@ func GetInvitesListByUserID(id int) (Relationships, error) {
 
 // UpdateRelationship updates the relationship specified in received JSON
 func UpdateRelationship(relationship *Relationship) error {
+	index := findIndexByRelationshipID(relationship.ID)
+	if index == -1 {
+		return ErrorRelationshipNotFound
+	}
+	
 	err := validateRelationship(relationship)
 	if err != nil {
 		return err
 	}
 
-	index := findIndexByRelationshipID(relationship.ID)
-	if index == -1 {
-		return ErrorRelationshipNotFound
-	}
 	relationshipList[index] = relationship
 	return nil
 }

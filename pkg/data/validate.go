@@ -13,8 +13,8 @@ var ErrorInvalidRelationshipType = fmt.Errorf("Invalid RelationshipType")
 func (relationship *Relationship) ValidateRelationship() error {
 	validate := validator.New()
 
-	errRelationshipType := validate.RegisterValidation("isRelationshipType", validateIsRelationshipType)
-	if errRelationshipType != nil {
+	err := validate.RegisterValidation("isRelationshipType", validateIsRelationshipType)
+	if err != nil {
 		panic(ErrorInvalidRelationshipType)
 	}
 	
