@@ -23,7 +23,11 @@ func (relationship *Relationship) ValidateRelationship() error {
 
 // validates the relationship type is valid
 func validateIsRelationshipType(fieldLevel validator.FieldLevel) bool {
-	relationshipType := int(fieldLevel.Field().Int())
+	relationshipType := fieldLevel.Field().String()
 
-	return !(relationshipType < int(None) || relationshipType > int(PendingOutgoing))
+	switch relationshipType {
+    case string(None), Friend, Blocked, PendingIncoming, PendingOutgoing:
+        return true
+    }
+	return false
 }

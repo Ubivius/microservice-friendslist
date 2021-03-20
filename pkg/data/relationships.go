@@ -18,15 +18,15 @@ var ErrorRelationshipExist = fmt.Errorf("A relationship with these two users alr
 var ErrorUserNotFound = fmt.Errorf("UserID doesn't exist")
 
 // RelationshipType of a relationship
-type RelationshipType int
+type RelationshipType string
 
 // relationship type of a friend request
 const (
-	None RelationshipType = iota // user has no intrinsic relationship
-	Friend                       // user is a friend
-	Blocked	                     // user is blocked
-	PendingIncoming	             // user has a pending incoming friend request to connected user
-	PendingOutgoing	             // current user has a pending outgoing friend request to user
+	None RelationshipType = "None"            // user has no intrinsic relationship
+	Friend                = "Friend"          // user is a friend
+	Blocked               = "Blocked"         // user is blocked
+	PendingIncoming	      = "PendingIncoming" // user has a pending incoming friend request to connected user
+	PendingOutgoing	      = "PendingOutgoing" // current user has a pending outgoing friend request to user
 )
 
 // Relationship defines the structure for an API relationship.
