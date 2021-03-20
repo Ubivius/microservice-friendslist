@@ -26,7 +26,7 @@ func validateIsRelationshipType(fieldLevel validator.FieldLevel) bool {
 	relationshipType := fieldLevel.Field().String()
 
 	switch relationshipType {
-    case string(None), Friend, Blocked, PendingIncoming, PendingOutgoing:
+    case string(None), string(Friend), string(Blocked), string(PendingIncoming), string(PendingOutgoing):
         return true
     }
 	return false
