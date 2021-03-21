@@ -1,9 +1,127 @@
-# microservice-template
-Template for microservices.
+# microservice-friendslist
+Friends list microservice for our online game framework.
 
-This template can be used to create another microservice without having to write any of the boilerplate code.
-
-**Launch local ElasticSearch**
+**Get Friends by UserID**
 ----
-  Run the elasticsearch.sh script to start a local ElasticSearch DB in a docker container.
-  You can validate if it is running at localhost:9200 in your browser.
+  Returns all friend relationships of the specific user.
+
+* **URL**
+
+  /friends/:user_id
+
+* **Method:**
+
+  `GET`
+  
+*  **URL Params**
+
+   **Required:**
+ 
+   `user_id=[integer]`
+
+* **Data Params**
+
+  None
+
+
+**Get Invites By UserID**
+----
+  Resends all friend invitations for the specific user.
+
+* **URL**
+
+  /invites/:user_id
+
+* **Method:**
+
+  `GET`
+  
+*  **URL Params**
+
+   **Required:**
+ 
+   `user_id=[integer]`
+
+* **Data Params**
+
+  None
+
+
+**Add new relationship**
+----
+  Add new relationship with specific data
+
+* **URL**
+
+  /relationships
+
+* **Method:**
+
+  `POST`
+  
+*  **URL Params**
+ 
+  None
+
+* **Data Params**
+
+  **Required:**
+
+  `user_1=[User]`
+  `user_2=[User]`
+
+  User
+  `user_id=[integer]`
+  `relationship_type=[integer]`
+
+
+**Update relationship**
+----
+  Update relationship data
+
+* **URL**
+
+  /relationships
+
+* **Method:**
+
+  `PUT`
+  
+*  **URL Params**
+ 
+  None
+
+* **Data Params**
+
+  **Required:**
+
+  `id=[integer]`
+  `user_1=[User]`
+  `user_2=[User]`
+
+  User
+  `user_id=[integer]`
+  `relationship_type=[integer]`
+
+
+**Delete relationship**
+----
+  Delete relationship
+
+* **URL**
+
+  /relationships/:id
+
+* **Method:**
+
+  `DELETE`
+  
+*  **URL Params**
+ 
+  **Required:**
+ 
+   `id=[integer]`
+
+* **Data Params**
+
+  None
