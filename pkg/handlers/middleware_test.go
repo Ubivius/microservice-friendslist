@@ -23,7 +23,7 @@ func TestValidationMiddlewareWithValidBody(t *testing.T) {
 	request := httptest.NewRequest(http.MethodPost, "/relationships", strings.NewReader(string(bodyBytes)))
 	response := httptest.NewRecorder()
 
-	relationshipHandler := NewRelationshipsHandler(NewTestLogger(), NewRelationshipDB())
+	relationshipHandler := NewRelationshipsHandler(newRelationshipDB())
 
 	// Create a router for middleware because function attachment is handled by gorilla/mux
 	router := mux.NewRouter()
@@ -53,7 +53,7 @@ func TestValidationMiddlewareWithNoUserID(t *testing.T) {
 	request := httptest.NewRequest(http.MethodPost, "/relationships", strings.NewReader(string(bodyBytes)))
 	response := httptest.NewRecorder()
 
-	relationshipHandler := NewRelationshipsHandler(NewTestLogger(), NewRelationshipDB())
+	relationshipHandler := NewRelationshipsHandler(newRelationshipDB())
 
 	// Create a router for middleware because linking is handled by gorilla/mux
 	router := mux.NewRouter()
@@ -85,7 +85,7 @@ func TestValidationMiddlewareWithNoUser1(t *testing.T) {
 	request := httptest.NewRequest(http.MethodPost, "/relationships", strings.NewReader(string(bodyBytes)))
 	response := httptest.NewRecorder()
 
-	relationshipHandler := NewRelationshipsHandler(NewTestLogger(), NewRelationshipDB())
+	relationshipHandler := NewRelationshipsHandler(newRelationshipDB())
 
 	// Create a router for middleware because linking is handled by gorilla/mux
 	router := mux.NewRouter()

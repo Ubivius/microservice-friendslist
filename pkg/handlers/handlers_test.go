@@ -2,10 +2,8 @@ package handlers
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"strings"
 	"testing"
 
@@ -14,12 +12,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// Move to util package in Sprint 9, should be a testing specific logger
-func NewTestLogger() *log.Logger {
-	return log.New(os.Stdout, "Tests", log.LstdFlags)
-}
-
-func NewRelationshipDB() database.RelationshipDB {
+func newRelationshipDB() database.RelationshipDB {
 	return database.NewMockRelationships()
 }
 
@@ -27,7 +20,7 @@ func TestGetExistingFriendsListByUserID(t *testing.T) {
 	request := httptest.NewRequest(http.MethodGet, "/friends/a2181017-5c53-422b-b6bc-036b27c04fc8", nil)
 	response := httptest.NewRecorder()
 
-	productHandler := NewRelationshipsHandler(NewTestLogger(), NewRelationshipDB())
+	productHandler := NewRelationshipsHandler(newRelationshipDB())
 
 	// Mocking gorilla/mux vars
 	vars := map[string]string{
@@ -49,7 +42,7 @@ func TestGetNonExistingFriendsListByUserID(t *testing.T) {
 	request := httptest.NewRequest(http.MethodGet, "/friends/e2382ea2-b5fa-4506-aa9d-d338aa52af44", nil)
 	response := httptest.NewRecorder()
 
-	productHandler := NewRelationshipsHandler(NewTestLogger(), NewRelationshipDB())
+	productHandler := NewRelationshipsHandler(newRelationshipDB())
 
 	// Mocking gorilla/mux vars
 	vars := map[string]string{
@@ -71,7 +64,7 @@ func TestGetExistingInvitesListByUserID(t *testing.T) {
 	request := httptest.NewRequest(http.MethodGet, "/invites/e2382ea2-b5fa-4506-aa9d-d338aa52af44", nil)
 	response := httptest.NewRecorder()
 
-	productHandler := NewRelationshipsHandler(NewTestLogger(), NewRelationshipDB())
+	productHandler := NewRelationshipsHandler(newRelationshipDB())
 
 	// Mocking gorilla/mux vars
 	vars := map[string]string{
@@ -93,7 +86,7 @@ func TestGetNonExistingInvitesListByUserID(t *testing.T) {
 	request := httptest.NewRequest(http.MethodGet, "/invites/c5825d3e-8a77-11eb-8dcd-0242ac130003", nil)
 	response := httptest.NewRecorder()
 
-	productHandler := NewRelationshipsHandler(NewTestLogger(), NewRelationshipDB())
+	productHandler := NewRelationshipsHandler(newRelationshipDB())
 
 	// Mocking gorilla/mux vars
 	vars := map[string]string{
@@ -126,7 +119,7 @@ func TestAddRelationship(t *testing.T) {
 	ctx := context.WithValue(request.Context(), KeyRelationship{}, body)
 	request = request.WithContext(ctx)
 
-	relationshipHandler := NewRelationshipsHandler(NewTestLogger(), NewRelationshipDB())
+	relationshipHandler := NewRelationshipsHandler(newRelationshipDB())
 	relationshipHandler.AddRelationship(response, request)
 
 	if response.Code != http.StatusNoContent {
@@ -149,7 +142,7 @@ func TestAddRelationshipThatAlreadyExists(t *testing.T) {
 	ctx := context.WithValue(request.Context(), KeyRelationship{}, body)
 	request = request.WithContext(ctx)
 
-	relationshipHandler := NewRelationshipsHandler(NewTestLogger(), NewRelationshipDB())
+	relationshipHandler := NewRelationshipsHandler(newRelationshipDB())
 	relationshipHandler.AddRelationship(response, request)
 
 	if response.Code != http.StatusBadRequest {
@@ -175,7 +168,7 @@ func TestAddRelationshipWithSameUserID(t *testing.T) {
 	ctx := context.WithValue(request.Context(), KeyRelationship{}, body)
 	request = request.WithContext(ctx)
 
-	relationshipHandler := NewRelationshipsHandler(NewTestLogger(), NewRelationshipDB())
+	relationshipHandler := NewRelationshipsHandler(newRelationshipDB())
 	relationshipHandler.AddRelationship(response, request)
 
 	if response.Code != http.StatusBadRequest {
@@ -202,7 +195,7 @@ func TestUpdateRelationship(t *testing.T) {
 	ctx := context.WithValue(request.Context(), KeyRelationship{}, body)
 	request = request.WithContext(ctx)
 
-	relationshipHandler := NewRelationshipsHandler(NewTestLogger(), NewRelationshipDB())
+	relationshipHandler := NewRelationshipsHandler(newRelationshipDB())
 	relationshipHandler.UpdateRelationships(response, request)
 
 	if response.Code != http.StatusNoContent {
@@ -226,7 +219,7 @@ func TestUpdateRelationshipWithSameUserID(t *testing.T) {
 	ctx := context.WithValue(request.Context(), KeyRelationship{}, body)
 	request = request.WithContext(ctx)
 
-	relationshipHandler := NewRelationshipsHandler(NewTestLogger(), NewRelationshipDB())
+	relationshipHandler := NewRelationshipsHandler(newRelationshipDB())
 	relationshipHandler.UpdateRelationships(response, request)
 
 	if response.Code != http.StatusBadRequest {
@@ -253,7 +246,7 @@ func TestUpdateToARelationshipThatAlreadyExist(t *testing.T) {
 	ctx := context.WithValue(request.Context(), KeyRelationship{}, body)
 	request = request.WithContext(ctx)
 
-	relationshipHandler := NewRelationshipsHandler(NewTestLogger(), NewRelationshipDB())
+	relationshipHandler := NewRelationshipsHandler(newRelationshipDB())
 	relationshipHandler.UpdateRelationships(response, request)
 
 	if response.Code != http.StatusBadRequest {
@@ -280,7 +273,7 @@ func TestUpdateNonExistantRelationship(t *testing.T) {
 	ctx := context.WithValue(request.Context(), KeyRelationship{}, body)
 	request = request.WithContext(ctx)
 
-	relationshipHandler := NewRelationshipsHandler(NewTestLogger(), NewRelationshipDB())
+	relationshipHandler := NewRelationshipsHandler(newRelationshipDB())
 	relationshipHandler.UpdateRelationships(response, request)
 
 	if response.Code != http.StatusNotFound {
@@ -295,7 +288,7 @@ func TestDeleteExistingRelationship(t *testing.T) {
 	request := httptest.NewRequest(http.MethodDelete, "/relationships/a2181017-5c53-422b-b6bc-036b27c04fc8", nil)
 	response := httptest.NewRecorder()
 
-	relationshipHandler := NewRelationshipsHandler(NewTestLogger(), NewRelationshipDB())
+	relationshipHandler := NewRelationshipsHandler(newRelationshipDB())
 
 	// Mocking gorilla/mux vars
 	vars := map[string]string{
@@ -313,7 +306,7 @@ func TestDeleteNonExistantRelationship(t *testing.T) {
 	request := httptest.NewRequest(http.MethodDelete, "/relationships/0", nil)
 	response := httptest.NewRecorder()
 
-	relationshipHandler := NewRelationshipsHandler(NewTestLogger(), NewRelationshipDB())
+	relationshipHandler := NewRelationshipsHandler(newRelationshipDB())
 
 	// Mocking gorilla/mux vars
 	vars := map[string]string{

@@ -8,7 +8,7 @@ import (
 
 // AddRelationship creates a new relationship from the received JSON
 func (relationshipHandler *RelationshipsHandler) AddRelationship(responseWriter http.ResponseWriter, request *http.Request) {
-	relationshipHandler.logger.Println("Handle POST Relationship")
+	log.Info("AddRelationship request")
 	relationship := request.Context().Value(KeyRelationship{}).(*data.Relationship)
 
 	err := relationshipHandler.db.AddRelationship(relationship)
@@ -17,19 +17,19 @@ func (relationshipHandler *RelationshipsHandler) AddRelationship(responseWriter 
 		responseWriter.WriteHeader(http.StatusNoContent)
 		return
 	case data.ErrorUserNotFound:
-		relationshipHandler.logger.Println("[ERROR} a userID doesn't exist", err)
+		log.Error(err, "A UserID doesn't exist")
 		http.Error(responseWriter, "A UserID doesn't exist", http.StatusBadRequest)
 		return
 	case data.ErrorSameUserID:
-		relationshipHandler.logger.Println("[ERROR} users in the relationship with same userID", err)
+		log.Error(err, "Users in the relationship with same userID")
 		http.Error(responseWriter, "Users in the relationship with same userID", http.StatusBadRequest)
 		return
 	case data.ErrorRelationshipExist:
-		relationshipHandler.logger.Println("[ERROR} relationship already exist", err)
+		log.Error(err, "Relationship already exist")
 		http.Error(responseWriter, "Relationship already exist", http.StatusBadRequest)
 		return
 	default:
-		relationshipHandler.logger.Println("[ERROR] adding relationship", err)
+		log.Error(err, "Error adding relationship")
 		http.Error(responseWriter, err.Error(), http.StatusInternalServerError)
 		return
 	}

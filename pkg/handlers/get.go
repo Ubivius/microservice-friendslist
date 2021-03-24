@@ -11,21 +11,22 @@ import (
 func (relationshipHandler *RelationshipsHandler) GetFriendsListByUserID(responseWriter http.ResponseWriter, request *http.Request) {
 	id := getUserID(request)
 
-	relationshipHandler.logger.Println("[DEBUG] getting friends list for userID", id)
+	log.Info("GetFriendsListByUserID request for userID","id", id)
 
 	friends, err := relationshipHandler.db.GetFriendsListByUserID(id)
 	switch err {
 	case nil:
 		err = json.NewEncoder(responseWriter).Encode(friends)
 		if err != nil {
-			relationshipHandler.logger.Println("[ERROR] serializing friends", err)
+			log.Error(err, "Error serializing friends")
 		}
+		return
 	case data.ErrorRelationshipNotFound:
-		relationshipHandler.logger.Println("[ERROR] fetching friends", err)
+		log.Error(err, "Friends not found")
 		http.Error(responseWriter, "Friends not found", http.StatusNotFound)
 		return
 	default:
-		relationshipHandler.logger.Println("[ERROR] fetching friends", err)
+		log.Error(err, "Error fetching friends")
 		http.Error(responseWriter, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -36,22 +37,22 @@ func (relationshipHandler *RelationshipsHandler) GetFriendsListByUserID(response
 func (relationshipHandler *RelationshipsHandler) GetInvitesListByUserID(responseWriter http.ResponseWriter, request *http.Request) {
 	id := getUserID(request)
 
-	relationshipHandler.logger.Println("[DEBUG] getting invites list for userID", id)
+	log.Info("GetInvitesListByUserID request for userID","id", id)
 
 	invites, err := relationshipHandler.db.GetInvitesListByUserID(id)
 	switch err {
 	case nil:
 		err = json.NewEncoder(responseWriter).Encode(invites)
 		if err != nil {
-			relationshipHandler.logger.Println("[ERROR] serializing invites", err)
+			log.Error(err, "Error serializing invites")
 		}
 		return
 	case data.ErrorRelationshipNotFound:
-		relationshipHandler.logger.Println("[ERROR] fetching invites", err)
+		log.Error(err, "Invites not found")
 		http.Error(responseWriter, "Invites not found", http.StatusNotFound)
 		return
 	default:
-		relationshipHandler.logger.Println("[ERROR] fetching invites", err)
+		log.Error(err, "Error fetching invites")
 		http.Error(responseWriter, err.Error(), http.StatusInternalServerError)
 		return
 	}

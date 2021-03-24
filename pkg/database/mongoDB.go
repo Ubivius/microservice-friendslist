@@ -2,7 +2,7 @@ package database
 
 import (
 	"context"
-	"log"
+	"os"
 	"time"
 
 	"github.com/Ubivius/microservice-friendslist/pkg/data"
@@ -15,15 +15,15 @@ import (
 type MongoRelationships struct {
 	client     *mongo.Client
 	collection *mongo.Collection
-	logger     *log.Logger
 }
 
-func NewMongoRelationships(l *log.Logger) RelationshipDB {
-	mp := &MongoRelationships{logger: l}
+func NewMongoRelationships() RelationshipDB {
+	mp := &MongoRelationships{}
 	err := mp.Connect()
 	// If connect fails, kill the program
 	if err != nil {
-		mp.logger.Fatal(err)
+		log.Error(err, "MongoDB setup failed")
+		os.Exit(1)
 	}
 	return mp
 }
@@ -35,16 +35,18 @@ func (mp *MongoRelationships) Connect() error {
 	// Connect to MongoDB
 	client, err := mongo.Connect(context.TODO(), clientOptions)
 	if err != nil || client == nil {
-		mp.logger.Fatalln("Failed to connect to database. Shutting down service")
+		log.Error(err, "Failed to connect to database. Shutting down service")
+		os.Exit(1)
 	}
 
 	// Ping DB
 	err = client.Ping(context.TODO(), nil)
 	if err != nil {
-		mp.logger.Fatal(err)
+		log.Error(err, "Failed to ping database. Shutting down service")
+		os.Exit(1)
 	}
 
-	log.Println("Connection to MongoDB established")
+	log.Info("Connection to MongoDB established")
 
 	collection := client.Database("test").Collection("relationships")
 
@@ -57,9 +59,7 @@ func (mp *MongoRelationships) Connect() error {
 func (mp *MongoRelationships) CloseDB() {
 	err := mp.client.Disconnect(context.TODO())
 	if err != nil {
-		mp.logger.Println(err)
-	} else {
-		log.Println("Connection to MongoDB closed.")
+		log.Error(err, "Error while disconnecting from database")
 	}
 }
 
@@ -91,7 +91,7 @@ func (mp *MongoRelationships) GetFriendsListByUserID(userID string) (*data.Relat
 	// Find returns a cursor that must be iterated through
 	cursor, err := mp.collection.Find(context.TODO(), filter)
 	if err != nil {
-		log.Fatal(err)
+		log.Error(err, "Error getting friends from database")
 	}
 
 	// Iterating through cursor
@@ -99,13 +99,13 @@ func (mp *MongoRelationships) GetFriendsListByUserID(userID string) (*data.Relat
 		var result data.Relationship
 		err := cursor.Decode(&result)
 		if err != nil {
-			log.Fatal(err)
+			log.Error(err, "Error decoding friends from database")
 		}
 		friends = append(friends, &result)
 	}
 
 	if err := cursor.Err(); err != nil {
-		log.Fatal(err)
+		log.Error(err, "Error in cursor after iteration")
 	}
 
 	// Close the cursor once finished
@@ -142,7 +142,7 @@ func (mp *MongoRelationships) GetInvitesListByUserID(userID string) (*data.Relat
 	// Find returns a cursor that must be iterated through
 	cursor, err := mp.collection.Find(context.TODO(), filter)
 	if err != nil {
-		log.Fatal(err)
+		log.Error(err, "Error getting invites from database")
 	}
 
 	// Iterating through cursor
@@ -150,13 +150,13 @@ func (mp *MongoRelationships) GetInvitesListByUserID(userID string) (*data.Relat
 		var result data.Relationship
 		err := cursor.Decode(&result)
 		if err != nil {
-			log.Fatal(err)
+			log.Error(err, "Error decoding invites from database")
 		}
 		invites = append(invites, &result)
 	}
 
 	if err := cursor.Err(); err != nil {
-		log.Fatal(err)
+		log.Error(err, "Error in cursor after iteration")
 	}
 
 	// Close the cursor once finished
@@ -183,7 +183,7 @@ func (mp *MongoRelationships) UpdateRelationship(relationship *data.Relationship
 	// Update a single item in the database with the values in update that match the filter
 	_, err = mp.collection.UpdateOne(context.TODO(), filter, update)
 	if err != nil {
-		log.Println(err)
+		log.Error(err, "Error updating relationship")
 	}
 
 	return err
@@ -207,7 +207,7 @@ func (mp *MongoRelationships) AddRelationship(relationship *data.Relationship) e
 		return err
 	}
 
-	log.Println("Inserting a document: ", insertResult.InsertedID)
+	log.Info("Inserting relationship", "Inserted ID", insertResult.InsertedID)
 	return nil
 }
 
@@ -218,10 +218,10 @@ func (mp *MongoRelationships) DeleteRelationship(id string) error {
 	// Delete a single item matching the filter
 	result, err := mp.collection.DeleteOne(context.TODO(), filter)
 	if err != nil {
-		log.Fatal(err)
+		log.Error(err, "Error deleting relationship")
 	}
 
-	log.Printf("Deleted %v documents in the relationships collection\n", result.DeletedCount)
+	log.Info("Deleted documents in relationships collection", "delete_count", result.DeletedCount)
 	return nil
 }
 

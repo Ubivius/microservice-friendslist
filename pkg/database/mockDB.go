@@ -1,7 +1,6 @@
 package database
 
 import (
-	"log"
 	"time"
 
 	"github.com/Ubivius/microservice-friendslist/pkg/data"
@@ -12,6 +11,7 @@ type MockRelationships struct {
 }
 
 func NewMockRelationships() RelationshipDB {
+	log.Info("Connecting to mock database")
 	return &MockRelationships{}
 }
 
@@ -20,7 +20,7 @@ func (mp *MockRelationships) Connect() error {
 }
 
 func (mp *MockRelationships) CloseDB() {
-	log.Println("Mocked DB connection closed")
+	log.Info("Mocked DB connection closed")
 }
 
 func (mp *MockRelationships) GetFriendsListByUserID(userID string) (*data.Relationships, error) {

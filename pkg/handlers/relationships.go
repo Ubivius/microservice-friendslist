@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/Ubivius/microservice-friendslist/pkg/database"
@@ -13,13 +12,12 @@ type KeyRelationship struct{}
 
 // RelationshipsHandler contains the items common to all relationship handler functions
 type RelationshipsHandler struct {
-	logger *log.Logger
-	db     database.RelationshipDB
+	db database.RelationshipDB
 }
 
 // NewRelationshipsHandler returns a pointer to a RelationshipsHandler with the logger passed as a parameter
-func NewRelationshipsHandler(logger *log.Logger, db database.RelationshipDB) *RelationshipsHandler {
-	return &RelationshipsHandler{logger, db}
+func NewRelationshipsHandler(db database.RelationshipDB) *RelationshipsHandler {
+	return &RelationshipsHandler{db}
 }
 
 // getRelationshipID extracts the relationship ID from the URL
