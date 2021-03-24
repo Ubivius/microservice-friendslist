@@ -9,7 +9,7 @@ import (
 // Delete a relationship with specified id from the database
 func (relationshipHandler *RelationshipsHandler) Delete(responseWriter http.ResponseWriter, request *http.Request) {
 	id := getRelationshipID(request)
-	relationshipHandler.logger.Println("Handle DELETE relationship", id)
+	log.Info("Delete relationship by ID request", "id", id)
 
 	err := relationshipHandler.db.DeleteRelationship(id)
 	switch err {
@@ -17,11 +17,11 @@ func (relationshipHandler *RelationshipsHandler) Delete(responseWriter http.Resp
 		responseWriter.WriteHeader(http.StatusNoContent)
 		return
 	case data.ErrorRelationshipNotFound:
-		relationshipHandler.logger.Println("[ERROR] deleting, id does not exist")
+		log.Error(err, "Error deleting relationship, id does not exist")
 		http.Error(responseWriter, "Relationship not found", http.StatusNotFound)
 		return
 	default:
-		relationshipHandler.logger.Println("[ERROR] deleting relationship", err)
+		log.Error(err, "Error deleting relationship")
 		http.Error(responseWriter, "Error deleting relationship", http.StatusInternalServerError)
 		return
 	}
