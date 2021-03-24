@@ -14,16 +14,16 @@ import (
 func TestValidationMiddlewareWithValidBody(t *testing.T) {
 	// Creating request body
 	body := &data.Relationship{
-		User1: 			data.User{UserID: 10, RelationshipType: data.PendingOutgoing},
-		User2:       	data.User{UserID: 11, RelationshipType: data.PendingIncoming},
-		ConversationID: 1,
+		User1: 			data.User{UserID: "7c69d432-8a78-11eb-8dcd-0242ac130003", RelationshipType: data.PendingOutgoing},
+		User2:       	data.User{UserID: "840d9692-8a78-11eb-8dcd-0242ac130003", RelationshipType: data.PendingIncoming},
+		ConversationID: "",
 	}
 	bodyBytes, _ := json.Marshal(body)
 
 	request := httptest.NewRequest(http.MethodPost, "/relationships", strings.NewReader(string(bodyBytes)))
 	response := httptest.NewRecorder()
 
-	relationshipHandler := NewRelationshipsHandler(NewTestLogger())
+	relationshipHandler := NewRelationshipsHandler(NewTestLogger(), NewRelationshipDB())
 
 	// Create a router for middleware because function attachment is handled by gorilla/mux
 	router := mux.NewRouter()
@@ -42,8 +42,8 @@ func TestValidationMiddlewareWithNoUserID(t *testing.T) {
 	// Creating request body
 	body := &data.Relationship{
 		User1:       	data.User{RelationshipType: data.PendingIncoming},
-		User2:       	data.User{UserID: 2, RelationshipType: data.PendingIncoming},
-		ConversationID: 1,
+		User2:       	data.User{UserID: "e2382ea2-b5fa-4506-aa9d-d338aa52af44", RelationshipType: data.PendingIncoming},
+		ConversationID: "",
 	}
 	bodyBytes, err := json.Marshal(body)
 	if err != nil {
@@ -53,7 +53,7 @@ func TestValidationMiddlewareWithNoUserID(t *testing.T) {
 	request := httptest.NewRequest(http.MethodPost, "/relationships", strings.NewReader(string(bodyBytes)))
 	response := httptest.NewRecorder()
 
-	relationshipHandler := NewRelationshipsHandler(NewTestLogger())
+	relationshipHandler := NewRelationshipsHandler(NewTestLogger(), NewRelationshipDB())
 
 	// Create a router for middleware because linking is handled by gorilla/mux
 	router := mux.NewRouter()
@@ -74,8 +74,8 @@ func TestValidationMiddlewareWithNoUserID(t *testing.T) {
 func TestValidationMiddlewareWithNoUser1(t *testing.T) {
 	// Creating request body
 	body := &data.Relationship{
-		User2:       	data.User{UserID: 2, RelationshipType: data.PendingIncoming},
-		ConversationID: 1,
+		User2:       	data.User{UserID: "e2382ea2-b5fa-4506-aa9d-d338aa52af44", RelationshipType: data.PendingIncoming},
+		ConversationID: "",
 	}
 	bodyBytes, err := json.Marshal(body)
 	if err != nil {
@@ -85,7 +85,7 @@ func TestValidationMiddlewareWithNoUser1(t *testing.T) {
 	request := httptest.NewRequest(http.MethodPost, "/relationships", strings.NewReader(string(bodyBytes)))
 	response := httptest.NewRecorder()
 
-	relationshipHandler := NewRelationshipsHandler(NewTestLogger())
+	relationshipHandler := NewRelationshipsHandler(NewTestLogger(), NewRelationshipDB())
 
 	// Create a router for middleware because linking is handled by gorilla/mux
 	router := mux.NewRouter()

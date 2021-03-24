@@ -13,7 +13,7 @@ func (relationshipHandler *RelationshipsHandler) GetFriendsListByUserID(response
 
 	relationshipHandler.logger.Println("[DEBUG] getting friends list for userID", id)
 
-	friends, err := data.GetFriendsListByUserID(id)
+	friends, err := relationshipHandler.db.GetFriendsListByUserID(id)
 	switch err {
 	case nil:
 		err = json.NewEncoder(responseWriter).Encode(friends)
@@ -38,13 +38,14 @@ func (relationshipHandler *RelationshipsHandler) GetInvitesListByUserID(response
 
 	relationshipHandler.logger.Println("[DEBUG] getting invites list for userID", id)
 
-	invites, err := data.GetInvitesListByUserID(id)
+	invites, err := relationshipHandler.db.GetInvitesListByUserID(id)
 	switch err {
 	case nil:
 		err = json.NewEncoder(responseWriter).Encode(invites)
 		if err != nil {
 			relationshipHandler.logger.Println("[ERROR] serializing invites", err)
 		}
+		return
 	case data.ErrorRelationshipNotFound:
 		relationshipHandler.logger.Println("[ERROR] fetching invites", err)
 		http.Error(responseWriter, "Invites not found", http.StatusNotFound)

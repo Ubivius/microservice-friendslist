@@ -4,9 +4,9 @@ import "testing"
 
 func TestChecksValidation(t *testing.T) {
 	relationship := &Relationship{
-		User1:      	User{UserID: 1, RelationshipType: Friend},
-		User2: 			User{UserID: 2, RelationshipType: Friend},
-		ConversationID:	1,
+		User1:      	User{UserID: "a2181017-5c53-422b-b6bc-036b27c04fc8", RelationshipType: Friend},
+		User2: 			User{UserID: "e2382ea2-b5fa-4506-aa9d-d338aa52af44", RelationshipType: Friend},
+		ConversationID:	"",
 	}
 
 	err := relationship.ValidateRelationship()
@@ -18,9 +18,9 @@ func TestChecksValidation(t *testing.T) {
 
 func TestInvalidRelationshipType(t *testing.T) {
 	relationship := &Relationship{
-		User1:      	User{UserID: 1, RelationshipType: "Deleted"},
-		User2: 			User{UserID: 2, RelationshipType: Friend},
-		ConversationID:	1,
+		User1:      	User{UserID: "a2181017-5c53-422b-b6bc-036b27c04fc8", RelationshipType: "Deleted"},
+		User2: 			User{UserID: "e2382ea2-b5fa-4506-aa9d-d338aa52af44", RelationshipType: Friend},
+		ConversationID:	"",
 	}
 
 	err := relationship.ValidateRelationship()

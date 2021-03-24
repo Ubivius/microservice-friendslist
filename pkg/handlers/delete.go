@@ -11,18 +11,18 @@ func (relationshipHandler *RelationshipsHandler) Delete(responseWriter http.Resp
 	id := getRelationshipID(request)
 	relationshipHandler.logger.Println("Handle DELETE relationship", id)
 
-	err := data.DeleteRelationship(id)
-	if err == data.ErrorRelationshipNotFound {
+	err := relationshipHandler.db.DeleteRelationship(id)
+	switch err {
+	case nil:
+		responseWriter.WriteHeader(http.StatusNoContent)
+		return
+	case data.ErrorRelationshipNotFound:
 		relationshipHandler.logger.Println("[ERROR] deleting, id does not exist")
 		http.Error(responseWriter, "Relationship not found", http.StatusNotFound)
 		return
-	}
-
-	if err != nil {
+	default:
 		relationshipHandler.logger.Println("[ERROR] deleting relationship", err)
 		http.Error(responseWriter, "Error deleting relationship", http.StatusInternalServerError)
 		return
 	}
-
-	responseWriter.WriteHeader(http.StatusNoContent)
 }

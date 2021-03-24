@@ -12,25 +12,30 @@ func (relationshipHandler *RelationshipsHandler) UpdateRelationships(responseWri
 	relationshipHandler.logger.Println("Handle PUT relationship", relationship.ID)
 
 	// Update relationship
-	err := data.UpdateRelationship(relationship)
-	if err == data.ErrorUserNotFound {
+	err := relationshipHandler.db.UpdateRelationship(relationship)
+	switch err {
+	case nil:
+		responseWriter.WriteHeader(http.StatusNoContent)
+		return
+	case data.ErrorUserNotFound:
 		relationshipHandler.logger.Println("[ERROR} a userID doesn't exist", err)
 		http.Error(responseWriter, "A UserID doesn't exist", http.StatusBadRequest)
 		return
-	} else if err == data.ErrorSameUserID {
+	case data.ErrorSameUserID:
 		relationshipHandler.logger.Println("[ERROR} users in the relationship with same userID", err)
 		http.Error(responseWriter, "Users in the relationship with same userID", http.StatusBadRequest)
 		return
-	} else if err == data.ErrorRelationshipExist {
+	case data.ErrorRelationshipExist:
 		relationshipHandler.logger.Println("[ERROR} relationship already exist", err)
 		http.Error(responseWriter, "Relationship already exist", http.StatusBadRequest)
 		return
-	} else if err == data.ErrorRelationshipNotFound {
+	case data.ErrorRelationshipNotFound:
 		relationshipHandler.logger.Println("[ERROR} relationship not found", err)
 		http.Error(responseWriter, "Relationship not found", http.StatusNotFound)
 		return
+	default:
+		relationshipHandler.logger.Println("[ERROR] updating relationship", err)
+		http.Error(responseWriter, err.Error(), http.StatusInternalServerError)
+		return
 	}
-
-	// Returns status, no content required
-	responseWriter.WriteHeader(http.StatusNoContent)
 }
