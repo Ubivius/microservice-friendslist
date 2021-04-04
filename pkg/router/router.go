@@ -1,7 +1,6 @@
 package router
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/Ubivius/microservice-friendslist/pkg/handlers"
@@ -9,13 +8,14 @@ import (
 )
 
 // New : Mux route handling with gorilla/mux
-func New(relationshipHandler *handlers.RelationshipsHandler, logger *log.Logger) *mux.Router {
+func New(relationshipHandler *handlers.RelationshipsHandler) *mux.Router {
+	log.Info("Starting router")
 	router := mux.NewRouter()
 
 	// Get Router
 	getRouter := router.Methods(http.MethodGet).Subrouter()
-	getRouter.HandleFunc("/friends/{user_id:[0-9]+}", relationshipHandler.GetFriendsListByUserID)
-	getRouter.HandleFunc("/invites/{user_id:[0-9]+}", relationshipHandler.GetInvitesListByUserID)
+	getRouter.HandleFunc("/friends/{user_id:[0-9a-z-]+}", relationshipHandler.GetFriendsListByUserID)
+	getRouter.HandleFunc("/invites/{user_id:[0-9a-z-]+}", relationshipHandler.GetInvitesListByUserID)
 
 	// Put router
 	putRouter := router.Methods(http.MethodPut).Subrouter()
@@ -29,7 +29,7 @@ func New(relationshipHandler *handlers.RelationshipsHandler, logger *log.Logger)
 
 	// Delete router
 	deleteRouter := router.Methods(http.MethodDelete).Subrouter()
-	deleteRouter.HandleFunc("/relationships/{id:[0-9]+}", relationshipHandler.Delete)
+	deleteRouter.HandleFunc("/relationships/{id:[0-9a-z-]+}", relationshipHandler.Delete)
 
 	return router
 }

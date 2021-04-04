@@ -9,28 +9,33 @@ import (
 // UpdateRelationships updates the relationship with the ID specified in the received JSON relationship
 func (relationshipHandler *RelationshipsHandler) UpdateRelationships(responseWriter http.ResponseWriter, request *http.Request) {
 	relationship := request.Context().Value(KeyRelationship{}).(*data.Relationship)
-	relationshipHandler.logger.Println("Handle PUT relationship", relationship.ID)
+	log.Info("UpdateRelationships request", "id", relationship.ID)
 
 	// Update relationship
-	err := data.UpdateRelationship(relationship)
-	if err == data.ErrorUserNotFound {
-		relationshipHandler.logger.Println("[ERROR} a userID doesn't exist", err)
+	err := relationshipHandler.db.UpdateRelationship(relationship)
+	switch err {
+	case nil:
+		responseWriter.WriteHeader(http.StatusNoContent)
+		return
+	case data.ErrorUserNotFound:
+		log.Error(err, "A UserID doesn't exist")
 		http.Error(responseWriter, "A UserID doesn't exist", http.StatusBadRequest)
 		return
-	} else if err == data.ErrorSameUserID {
-		relationshipHandler.logger.Println("[ERROR} users in the relationship with same userID", err)
+	case data.ErrorSameUserID:
+		log.Error(err, "Users in the relationship with same userID")
 		http.Error(responseWriter, "Users in the relationship with same userID", http.StatusBadRequest)
 		return
-	} else if err == data.ErrorRelationshipExist {
-		relationshipHandler.logger.Println("[ERROR} relationship already exist", err)
+	case data.ErrorRelationshipExist:
+		log.Error(err, "Relationship already exist")
 		http.Error(responseWriter, "Relationship already exist", http.StatusBadRequest)
 		return
-	} else if err == data.ErrorRelationshipNotFound {
-		relationshipHandler.logger.Println("[ERROR} relationship not found", err)
+	case data.ErrorRelationshipNotFound:
+		log.Error(err, "Relationship not found")
 		http.Error(responseWriter, "Relationship not found", http.StatusNotFound)
 		return
+	default:
+		log.Error(err, "Error updating relationship")
+		http.Error(responseWriter, err.Error(), http.StatusInternalServerError)
+		return
 	}
-
-	// Returns status, no content required
-	responseWriter.WriteHeader(http.StatusNoContent)
 }

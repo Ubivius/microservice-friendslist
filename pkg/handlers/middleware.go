@@ -16,7 +16,7 @@ func (relationshipHandler *RelationshipsHandler) MiddlewareRelationshipValidatio
 
 		err := json.NewDecoder(request.Body).Decode(relationship)
 		if err != nil {
-			relationshipHandler.logger.Println("[ERROR] deserializing relationship", err)
+			log.Error(err, "Error deserializing relationship")
 			http.Error(responseWriter, "Error reading relationship", http.StatusBadRequest)
 			return
 		}
@@ -24,7 +24,7 @@ func (relationshipHandler *RelationshipsHandler) MiddlewareRelationshipValidatio
 		// validate the relationship
 		err = relationship.ValidateRelationship()
 		if err != nil {
-			relationshipHandler.logger.Println("[ERROR] validating relationship", err)
+			log.Error(err, "Error validating relationship")
 			http.Error(responseWriter, fmt.Sprintf("Error validating relationship: %s", err), http.StatusBadRequest)
 			return
 		}

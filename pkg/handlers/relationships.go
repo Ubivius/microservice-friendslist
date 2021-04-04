@@ -1,10 +1,9 @@
 package handlers
 
 import (
-	"log"
 	"net/http"
-	"strconv"
 
+	"github.com/Ubivius/microservice-friendslist/pkg/database"
 	"github.com/gorilla/mux"
 )
 
@@ -13,34 +12,30 @@ type KeyRelationship struct{}
 
 // RelationshipsHandler contains the items common to all relationship handler functions
 type RelationshipsHandler struct {
-	logger *log.Logger
+	db database.RelationshipDB
 }
 
 // NewRelationshipsHandler returns a pointer to a RelationshipsHandler with the logger passed as a parameter
-func NewRelationshipsHandler(logger *log.Logger) *RelationshipsHandler {
-	return &RelationshipsHandler{logger}
+func NewRelationshipsHandler(db database.RelationshipDB) *RelationshipsHandler {
+	return &RelationshipsHandler{db}
 }
 
 // getRelationshipID extracts the relationship ID from the URL
 // The verification of this variable is handled by gorilla/mux
 // We panic if it is not valid because that means gorilla is failing
-func getRelationshipID(request *http.Request) int {
+func getRelationshipID(request *http.Request) string {
 	vars := mux.Vars(request)
-	id, err := strconv.Atoi(vars["id"])
-	if err != nil {
-		panic(err)
-	}
+	id := vars["id"]
+	
 	return id
 }
 
 // getUserID extracts the user ID from the URL
 // The verification of this variable is handled by gorilla/mux
 // We panic if it is not valid because that means gorilla is failing
-func getUserID(request *http.Request) int {
+func getUserID(request *http.Request) string {
 	vars := mux.Vars(request)
-	userID, err := strconv.Atoi(vars["user_id"])
-	if err != nil {
-		panic(err)
-	}
+	userID := vars["user_id"]
+
 	return userID
 }
