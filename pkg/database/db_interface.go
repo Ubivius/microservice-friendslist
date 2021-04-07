@@ -14,7 +14,8 @@ type RelationshipDB interface {
 	validateRelationship(relationship *data.Relationship) error
 	relationshipExist(id string, userID1 string, userID2 string) (bool, error)
 	validateUserExist(userID string) bool
-	getConversationID() string
+	getConversationID(userID []string) (string, error)
 	Connect() error
+	PingDB() error
 	CloseDB()
 }

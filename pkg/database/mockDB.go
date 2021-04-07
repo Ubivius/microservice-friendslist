@@ -19,6 +19,10 @@ func (mp *MockRelationships) Connect() error {
 	return nil
 }
 
+func (mp *MockRelationships) PingDB() error {
+	return nil
+}
+
 func (mp *MockRelationships) CloseDB() {
 	log.Info("Mocked DB connection closed")
 }
@@ -58,7 +62,7 @@ func (mp *MockRelationships) AddRelationship(relationship *data.Relationship) er
 	err := mp.validateRelationship(relationship)
 	if err == nil {
 		relationship.ID = uuid.NewString()
-		relationship.ConversationID = mp.getConversationID()
+		relationship.ConversationID, err = mp.getConversationID([]string{relationship.User1.UserID, relationship.User2.UserID})
 		relationshipList = append(relationshipList, relationship)
 	}
 	return err
@@ -148,8 +152,8 @@ func (mp *MockRelationships) relationshipExist(id string, userID1 string, userID
 	return false, nil
 }
 
-func (mp *MockRelationships) getConversationID() string {
-	return ""
+func (mp *MockRelationships) getConversationID(userID []string) (string, error) {
+	return uuid.NewString(), nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////

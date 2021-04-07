@@ -46,3 +46,6 @@ type User struct {
 
 // Relationships is a collection of Relationship
 type Relationships []*Relationship
+
+const MicroserviceUserPath = "http://microservice-user:9090"
+const MicroserviceTextChatPath = "http://microservice-text-chat:9090"
