@@ -16,12 +16,6 @@ func (relationshipHandler *RelationshipsHandler) LivenessCheck(responseWriter ht
 func (relationshipHandler *RelationshipsHandler) ReadinessCheck(responseWriter http.ResponseWriter, request *http.Request) {
 	log.Info("ReadinessCheck")
 
-	readinessProbeMicroserviceUser := data.MicroserviceUserPath + "/health/ready"
-	readinessProbeMicroserviceTextChat := data.MicroserviceTextChatPath + "/health/ready"
-
-	_, errMicroserviceUser := http.Get(readinessProbeMicroserviceUser)
-	_, errMicroserviceTextChat := http.Get(readinessProbeMicroserviceTextChat)
-
 	err := relationshipHandler.db.PingDB()
 
 	if err != nil {
@@ -30,14 +24,20 @@ func (relationshipHandler *RelationshipsHandler) ReadinessCheck(responseWriter h
 		return
 	}
 
-	if errMicroserviceUser != nil {
-		log.Error(errMicroserviceUser, "Microservice-user unavailable")
+	readinessProbeMicroserviceUser := data.MicroserviceUserPath + "/health/ready"
+	_, err = http.Get(readinessProbeMicroserviceUser)
+
+	if err != nil {
+		log.Error(err, "Microservice-user unavailable")
 		http.Error(responseWriter, "Microservice-user unavailable", http.StatusServiceUnavailable)
 		return
 	}
 
-	if errMicroserviceTextChat != nil {
-		log.Error(errMicroserviceTextChat, "Microservice-text-chat unavailable")
+	readinessProbeMicroserviceTextChat := data.MicroserviceTextChatPath + "/health/ready"
+	_, err = http.Get(readinessProbeMicroserviceTextChat)
+
+	if err != nil {
+		log.Error(err, "Microservice-text-chat unavailable")
 		http.Error(responseWriter, "Microservice-text-chat unavailable", http.StatusServiceUnavailable)
 		return
 	}
