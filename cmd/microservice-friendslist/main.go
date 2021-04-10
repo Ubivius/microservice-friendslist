@@ -10,6 +10,7 @@ import (
 
 	"github.com/Ubivius/microservice-friendslist/pkg/database"
 	"github.com/Ubivius/microservice-friendslist/pkg/handlers"
+	"github.com/Ubivius/microservice-friendslist/pkg/resources"
 	"github.com/Ubivius/microservice-friendslist/pkg/router"
 	"go.opentelemetry.io/otel/exporters/stdout"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
@@ -41,8 +42,11 @@ func main() {
 	tracerProvider := sdktrace.NewTracerProvider(sdktrace.WithSpanProcessor(batchSpanProcessor))
 	defer func() { _ = tracerProvider.Shutdown(ctx) }()
 
+	// Resources init
+	resources := resources.NewResources()
+
 	// Database init
-	db := database.NewMongoRelationships()
+	db := database.NewMongoRelationships(resources)
 
 	// Creating handlers
 	relationshipHandler := handlers.NewRelationshipsHandler(db)
