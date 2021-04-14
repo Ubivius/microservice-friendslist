@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/Ubivius/microservice-friendslist/pkg/data"
+	"github.com/Ubivius/microservice-friendslist/pkg/resources"
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -19,12 +20,13 @@ import (
 )
 
 type MongoRelationships struct {
-	client     *mongo.Client
-	collection *mongo.Collection
+	client           *mongo.Client
+	collection       *mongo.Collection
+	resourceManager  resources.ResourceManager
 }
 
-func NewMongoRelationships() RelationshipDB {
-	mp := &MongoRelationships{}
+func NewMongoRelationships(r resources.ResourceManager) RelationshipDB {
+	mp := &MongoRelationships{resourceManager: r}
 	err := mp.Connect()
 	// If connect fails, kill the program
 	if err != nil {
@@ -35,8 +37,15 @@ func NewMongoRelationships() RelationshipDB {
 }
 
 func (mp *MongoRelationships) Connect() error {
+	// Getting mongodb secret
+	password, err := mp.resourceManager.GetSecret("default", "mongodb", "mongodb-root-password")
+	if err != nil {
+		log.Error(err, "Failed to get mongodb secret")
+		os.Exit(1)
+	}
+
 	// Setting client options
-	clientOptions := options.Client().ApplyURI("mongodb://admin:pass@localhost:27888/?authSource=admin")
+	clientOptions := options.Client().ApplyURI("mongodb://root:" + password + "@mongodb:27017/?authSource=admin")
 
 	// Connect to MongoDB
 	client, err := mongo.Connect(context.TODO(), clientOptions)

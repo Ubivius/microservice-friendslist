@@ -1,0 +1,20 @@
+{{- if and .Values.rbac.enabled .Values.rbac.namespaced }}
+apiVersion: {{ template "rbac.apiVersion" . }}
+kind: RoleBinding
+metadata:
+  name: {{ template "microservice-friendslist.fullname" . }}
+  labels:
+    {{- include "microservice-friendslist.labels" . | nindent 4 }}
+{{- with .Values.annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+{{- end }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ template "microservice-friendslist.fullname" . }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "microservice-friendslist.serviceAccountName" . }}
+    namespace: {{ template "microservice-friendslist.namespace" . }}
+{{- end -}}
