@@ -17,6 +17,10 @@ func New(relationshipHandler *handlers.RelationshipsHandler) *mux.Router {
 	getRouter.HandleFunc("/friends/{user_id:[0-9a-z-]+}", relationshipHandler.GetFriendsListByUserID)
 	getRouter.HandleFunc("/invites/{user_id:[0-9a-z-]+}", relationshipHandler.GetInvitesListByUserID)
 
+	//Health Check
+	getRouter.HandleFunc("/health/live", relationshipHandler.LivenessCheck)
+	getRouter.HandleFunc("/health/ready", relationshipHandler.ReadinessCheck)
+
 	// Put router
 	putRouter := router.Methods(http.MethodPut).Subrouter()
 	putRouter.HandleFunc("/relationships", relationshipHandler.UpdateRelationships)

@@ -1,8 +1,14 @@
 package database
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
+	"io/ioutil"
+	"net/http"
 	"os"
+	"regexp"
+	"strings"
 	"time"
 
 	"github.com/Ubivius/microservice-friendslist/pkg/data"
@@ -48,12 +54,16 @@ func (mp *MongoRelationships) Connect() error {
 
 	log.Info("Connection to MongoDB established")
 
-	collection := client.Database("test").Collection("relationships")
+	collection := client.Database("ubivius").Collection("relationships")
 
 	// Assign client and collection to the MongoRelationships struct
 	mp.collection = collection
 	mp.client = client
 	return nil
+}
+
+func (mp *MongoRelationships) PingDB() error {
+	return mp.client.Ping(context.TODO(), nil)
 }
 
 func (mp *MongoRelationships) CloseDB() {
@@ -196,7 +206,11 @@ func (mp *MongoRelationships) AddRelationship(relationship *data.Relationship) e
 	}
 
 	relationship.ID = uuid.NewString()
-	relationship.ConversationID = mp.getConversationID()
+	relationship.ConversationID, err = mp.getConversationID([]string{relationship.User1.UserID, relationship.User2.UserID})
+	if err != nil {
+		return err
+	}
+	
 	// Adding time information to new relationship
 	relationship.CreatedOn = time.Now().UTC().String()
 	relationship.UpdatedOn = time.Now().UTC().String()
@@ -246,8 +260,9 @@ func (mp *MongoRelationships) validateRelationship(relationship *data.Relationsh
 }
 
 func (mp *MongoRelationships) validateUserExist(userID string) bool {
-	// validation of the UserID with a call to microservice-user 
-	return true
+	getUserByIDPath := data.MicroserviceUserPath + "/users/" + userID
+	resp, err := http.Get(getUserByIDPath)
+	return err == nil && resp.StatusCode == 200
 }
 
 func (mp *MongoRelationships) relationshipExist(id string, userID1 string, userID2 string) (bool, error) {
@@ -281,7 +296,29 @@ func (mp *MongoRelationships) relationshipExist(id string, userID1 string, userI
 	return true, err
 }
 
-func (mp *MongoRelationships) getConversationID() string {
-	// Call to the text-chat microservice to create a conversation and get the ID
-	return ""
+func (mp *MongoRelationships) getConversationID(userID []string) (string, error) {
+	postConversationPath := data.MicroserviceTextChatPath + "/conversations"
+
+	values := map[string][]string{"user_id": userID}
+
+	jsonValue, _ := json.Marshal(values)
+
+	resp, err := http.Post(postConversationPath,"application/json", bytes.NewBuffer(jsonValue))
+	
+	body, _ := ioutil.ReadAll(resp.Body)
+	conversationID := ExtractValue(string(body), "id")
+
+	return conversationID, err
+}
+
+// extracts the value for a key from a JSON-formatted string
+// body - the JSON-response as a string. Usually retrieved via the request body
+// key - the key for which the value should be extracted
+// returns - the value for the given key
+func ExtractValue(body string, key string) string {
+	keystr := "\"" + key + "\":[^,;\\]}]*"
+	r, _ := regexp.Compile(keystr)
+	match := r.FindString(body)
+	keyValMatch := strings.Split(match, ":")
+	return strings.ReplaceAll(keyValMatch[1], "\"", "")
 }

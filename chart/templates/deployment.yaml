@@ -1,25 +1,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "microservice-template.fullname" . }}
+  name: {{ include "microservice-friendslist.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "microservice-template.labels" . | nindent 4 }}
+    {{- include "microservice-friendslist.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      {{- include "microservice-template.selectorLabels" . | nindent 6 }}
+      {{- include "microservice-friendslist.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "microservice-template.selectorLabels" . | nindent 8 }}
+        {{- include "microservice-friendslist.selectorLabels" . | nindent 8 }}
     spec:
     {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
     {{- end }}
-      serviceAccountName: {{ include "microservice-template.serviceAccountName" . }}
+      serviceAccountName: {{ include "microservice-friendslist.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
