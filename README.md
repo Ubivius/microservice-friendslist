@@ -1,127 +1,54 @@
 # microservice-friendslist
 Friends list microservice for our online game framework.
 
-**Get Friends by UserID**
-----
-  Returns all friend relationships of the specific user.
+## Friends list endpoints
 
-* **URL**
+`GET` `/friends/{user_id}` Returns all friend relationships of the specific user. `user_id=[string]`
 
-  /friends/:user_id
+`GET` `/invites/{user_id}` Resends all friend invitations for the specific user. `user_id=[string]`
 
-* **Method:**
+`GET` `/health/live` Returns a Status OK when live.
 
-  `GET`
-  
-*  **URL Params**
+`GET` `/health/ready` Returns a Status OK when ready or an error when dependencies are not available.
 
-   **Required:**
- 
-   `user_id=[integer]`
+`POST` `/relationships` Add new relationship with specific data. Creates a conversation with [microservice-text-chat](https://github.com/Ubivius/microservice-text-chat) and add the conversation ID to the relationship. </br>
+__Data Params__
+```json
+{
+  "user_1": {
+    "user_id":           "string, required",
+    "relationship_type": "string, required",
+  },
+  "user_2": {
+    "user_id":           "string, required",
+    "relationship_type": "string, required",
+  },
+}
+```
+__Relationshipe type__
+```
+None            // user has no intrinsic relationship
+Friend          // user is a friend
+Blocked         // user is blocked
+PendingIncoming	// user has a pending incoming friend request to connected user
+PendingOutgoing	// current user has a pending outgoing friend request to user
+```
 
-* **Data Params**
+`PUT` `/relationships` Update relationship data</br>
+__Data Params__
+```json
+{
+  "id":                  "string, required",
+  "user_1": {
+    "user_id":           "string",
+    "relationship_type": "string",
+  },
+  "user_2": {
+    "user_id":           "string",
+    "relationship_type": "string",
+  },
+  "conversation_id":     "string",
+}
+```
 
-  None
-
-
-**Get Invites By UserID**
-----
-  Resends all friend invitations for the specific user.
-
-* **URL**
-
-  /invites/:user_id
-
-* **Method:**
-
-  `GET`
-  
-*  **URL Params**
-
-   **Required:**
- 
-   `user_id=[integer]`
-
-* **Data Params**
-
-  None
-
-
-**Add new relationship**
-----
-  Add new relationship with specific data
-
-* **URL**
-
-  /relationships
-
-* **Method:**
-
-  `POST`
-  
-*  **URL Params**
- 
-  None
-
-* **Data Params**
-
-  **Required:**
-
-  `user_1=[User]`
-  `user_2=[User]`
-
-  User
-  `user_id=[integer]`
-  `relationship_type=[integer]`
-
-
-**Update relationship**
-----
-  Update relationship data
-
-* **URL**
-
-  /relationships
-
-* **Method:**
-
-  `PUT`
-  
-*  **URL Params**
- 
-  None
-
-* **Data Params**
-
-  **Required:**
-
-  `id=[integer]`
-  `user_1=[User]`
-  `user_2=[User]`
-
-  User
-  `user_id=[integer]`
-  `relationship_type=[integer]`
-
-
-**Delete relationship**
-----
-  Delete relationship
-
-* **URL**
-
-  /relationships/:id
-
-* **Method:**
-
-  `DELETE`
-  
-*  **URL Params**
- 
-  **Required:**
- 
-   `id=[integer]`
-
-* **Data Params**
-
-  None
+`DELETE` `/relationships/{id}` Delete a relationship.  `id=[string]`
