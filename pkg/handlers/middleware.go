@@ -6,35 +6,31 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/Ubivius/microservice-template/pkg/data"
+	"github.com/Ubivius/microservice-friendslist/pkg/data"
 )
 
-// Errors should be templated in the future.
-// A good starting reference can be found here : https://github.com/nicholasjackson/building-microservices-youtube/blob/episode_7/product-api/handlers/middleware.go
-// We want our validation errors to have a standard format
-
-// MiddlewareProductValidation is used to validate incoming product JSONS
-func (productHandler *ProductsHandler) MiddlewareProductValidation(next http.Handler) http.Handler {
+// MiddlewareRelationshipValidation is used to validate incoming relationship JSONS
+func (relationshipHandler *RelationshipsHandler) MiddlewareRelationshipValidation(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(responseWriter http.ResponseWriter, request *http.Request) {
-		product := &data.Product{}
+		relationship := &data.Relationship{}
 
-		err := json.NewDecoder(request.Body).Decode(product)
+		err := json.NewDecoder(request.Body).Decode(relationship)
 		if err != nil {
-			productHandler.logger.Println("[ERROR] deserializing product", err)
-			http.Error(responseWriter, "Error reading product", http.StatusBadRequest)
+			log.Error(err, "Error deserializing relationship")
+			http.Error(responseWriter, "Error reading relationship", http.StatusBadRequest)
 			return
 		}
 
-		// validate the product
-		err = product.ValidateProduct()
+		// validate the relationship
+		err = relationship.ValidateRelationship()
 		if err != nil {
-			productHandler.logger.Println("[ERROR] validating product", err)
-			http.Error(responseWriter, fmt.Sprintf("Error validating product: %s", err), http.StatusBadRequest)
+			log.Error(err, "Error validating relationship")
+			http.Error(responseWriter, fmt.Sprintf("Error validating relationship: %s", err), http.StatusBadRequest)
 			return
 		}
 
-		// Add the product to the context
-		ctx := context.WithValue(request.Context(), KeyProduct{}, product)
+		// Add the relationship to the context
+		ctx := context.WithValue(request.Context(), KeyRelationship{}, relationship)
 		request = request.WithContext(ctx)
 
 		// Call the next handler, which can be another middleware or the final handler

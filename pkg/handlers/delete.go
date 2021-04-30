@@ -3,26 +3,26 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/Ubivius/microservice-template/pkg/data"
+	"github.com/Ubivius/microservice-friendslist/pkg/data"
 )
 
-// Delete a product with specified id from the database
-func (productHandler *ProductsHandler) Delete(responseWriter http.ResponseWriter, request *http.Request) {
-	id := getProductID(request)
-	productHandler.logger.Println("Handle DELETE product", id)
+// Delete a relationship with specified id from the database
+func (relationshipHandler *RelationshipsHandler) Delete(responseWriter http.ResponseWriter, request *http.Request) {
+	id := getRelationshipID(request)
+	log.Info("Delete relationship by ID request", "id", id)
 
-	err := data.DeleteProduct(id)
-	if err == data.ErrorProductNotFound {
-		productHandler.logger.Println("[ERROR] deleting, id does not exist")
-		http.Error(responseWriter, "Product not found", http.StatusNotFound)
+	err := relationshipHandler.db.DeleteRelationship(id)
+	switch err {
+	case nil:
+		responseWriter.WriteHeader(http.StatusNoContent)
+		return
+	case data.ErrorRelationshipNotFound:
+		log.Error(err, "Error deleting relationship, id does not exist")
+		http.Error(responseWriter, "Relationship not found", http.StatusNotFound)
+		return
+	default:
+		log.Error(err, "Error deleting relationship")
+		http.Error(responseWriter, "Error deleting relationship", http.StatusInternalServerError)
 		return
 	}
-
-	if err != nil {
-		productHandler.logger.Println("[ERROR] deleting product", err)
-		http.Error(responseWriter, "Error deleting poduct", http.StatusInternalServerError)
-		return
-	}
-
-	responseWriter.WriteHeader(http.StatusNoContent)
 }
