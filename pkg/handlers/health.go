@@ -8,14 +8,11 @@ import (
 
 // LivenessCheck determine when the application needs to be restarted
 func (relationshipHandler *RelationshipsHandler) LivenessCheck(responseWriter http.ResponseWriter, request *http.Request) {
-	log.Info("LivenessCheck")
 	responseWriter.WriteHeader(http.StatusOK)
 }
 
 //ReadinessCheck verifies that the application is ready to accept requests
 func (relationshipHandler *RelationshipsHandler) ReadinessCheck(responseWriter http.ResponseWriter, request *http.Request) {
-	log.Info("ReadinessCheck")
-
 	err := relationshipHandler.db.PingDB()
 
 	if err != nil {
