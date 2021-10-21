@@ -4,19 +4,14 @@ import (
 	"testing"
 
 	"github.com/Ubivius/microservice-friendslist/pkg/data"
-	"github.com/Ubivius/microservice-friendslist/pkg/resources"
 )
-
-func newResourceManager() resources.ResourceManager {
-	return resources.NewMockResources()
-}
 
 func TestMongoDBConnectionAndShutdownIntegration(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Test skipped during unit tests")
 	}
 
-	mp := NewMongoRelationships(newResourceManager())
+	mp := NewMongoRelationships()
 	if mp == nil {
 		t.Fail()
 	}
@@ -34,7 +29,7 @@ func TestMongoDBAddRelationshipIntegration(t *testing.T) {
 		ConversationID: "",
 	}
 
-	mp := NewMongoRelationships(newResourceManager())
+	mp := NewMongoRelationships()
 	err := mp.AddRelationship(relationship)
 	if err != nil {
 		t.Errorf("Failed to add relationship to database")
@@ -54,7 +49,7 @@ func TestMongoDBUpdateRelationshipIntegration(t *testing.T) {
 		ConversationID: "",
 	}
 
-	mp := NewMongoRelationships(newResourceManager())
+	mp := NewMongoRelationships()
 	err := mp.UpdateRelationship(relationship)
 	if err != nil {
 		t.Fail()
@@ -67,7 +62,7 @@ func TestMongoDBGetFriendsListByUserIDIntegration(t *testing.T) {
 		t.Skip("Test skipped during unit tests")
 	}
 
-	mp := NewMongoRelationships(newResourceManager())
+	mp := NewMongoRelationships()
 	_, err := mp.GetFriendsListByUserID("a2181017-5c53-422b-b6bc-036b27c04fc8")
 	if err != nil {
 		t.Fail()
@@ -81,7 +76,7 @@ func TestMongoDBGetInvitesListByUserIDIntegration(t *testing.T) {
 		t.Skip("Test skipped during unit tests")
 	}
 
-	mp := NewMongoRelationships(newResourceManager())
+	mp := NewMongoRelationships()
 	_, err := mp.GetInvitesListByUserID("e2382ea2-b5fa-4506-aa9d-d338aa52af84")
 	if err != nil {
 		t.Fail()
