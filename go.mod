@@ -19,6 +19,10 @@ require (
 	github.com/xdg/stringprep v0.0.0-20180714160509-73f8eece6fdc // indirect
 	go.etcd.io/etcd v0.5.0-alpha.5.0.20200910180754-dd1b699fc489 // indirect
 	go.mongodb.org/mongo-driver v1.7.4
+	go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux v0.26.1 // indirect
+	go.opentelemetry.io/contrib/instrumentation/go.mongodb.org/mongo-driver/mongo/otelmongo v0.26.1 // indirect
+	go.opentelemetry.io/contrib/propagators v0.20.0 // indirect
+	go.opentelemetry.io/otel v1.1.0 // indirect
 	go.opentelemetry.io/otel/exporters/stdout v0.16.0
 	go.opentelemetry.io/otel/sdk v1.0.1
 	go.uber.org/tools v0.0.0-20190618225709-2cfd321de3ee // indirect
