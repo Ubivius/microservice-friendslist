@@ -23,8 +23,8 @@ import (
 var ErrorEnvVar = fmt.Errorf("missing environment variable")
 
 type MongoRelationships struct {
-	client           *mongo.Client
-	collection       *mongo.Collection
+	client     *mongo.Client
+	collection *mongo.Collection
 }
 
 func NewMongoRelationships() RelationshipDB {
@@ -81,24 +81,24 @@ func (mp *MongoRelationships) CloseDB() {
 
 func (mp *MongoRelationships) GetFriendsListByUserID(userID string) (*data.Relationships, error) {
 	// MongoDB search filter
-	filter := bson.D{{ 
-		Key:"$or", 
+	filter := bson.D{{
+		Key: "$or",
 		Value: bson.A{
 			bson.D{{
 				Key: "$and",
-				Value: bson.A{ 
+				Value: bson.A{
 					bson.D{{Key: "user_1.user_id", Value: userID}},
 					bson.D{{Key: "user_1.relationship_type", Value: data.Friend}},
 				},
 			}},
 			bson.D{{
 				Key: "$and",
-				Value: bson.A{ 
+				Value: bson.A{
 					bson.D{{Key: "user_2.user_id", Value: userID}},
 					bson.D{{Key: "user_2.relationship_type", Value: data.Friend}},
 				},
 			}},
-		}, 
+		},
 	}}
 
 	// friends will hold the array of Relationships
@@ -132,24 +132,24 @@ func (mp *MongoRelationships) GetFriendsListByUserID(userID string) (*data.Relat
 
 func (mp *MongoRelationships) GetInvitesListByUserID(userID string) (*data.Relationships, error) {
 	// MongoDB search filter
-	filter := bson.D{{ 
-		Key:"$or", 
+	filter := bson.D{{
+		Key: "$or",
 		Value: bson.A{
 			bson.D{{
 				Key: "$and",
-				Value: bson.A{ 
+				Value: bson.A{
 					bson.D{{Key: "user_1.user_id", Value: userID}},
 					bson.D{{Key: "user_1.relationship_type", Value: data.PendingIncoming}},
 				},
 			}},
 			bson.D{{
 				Key: "$and",
-				Value: bson.A{ 
+				Value: bson.A{
 					bson.D{{Key: "user_2.user_id", Value: userID}},
 					bson.D{{Key: "user_2.relationship_type", Value: data.PendingIncoming}},
 				},
 			}},
-		}, 
+		},
 	}}
 
 	// friends will hold the array of Relationships
@@ -216,7 +216,7 @@ func (mp *MongoRelationships) AddRelationship(relationship *data.Relationship) e
 	if err != nil {
 		return err
 	}
-	
+
 	// Adding time information to new relationship
 	relationship.CreatedOn = time.Now().UTC().String()
 	relationship.UpdatedOn = time.Now().UTC().String()
@@ -246,7 +246,7 @@ func (mp *MongoRelationships) DeleteRelationship(id string) error {
 }
 
 func (mp *MongoRelationships) validateRelationship(relationship *data.Relationship) error {
-	if !mp.validateUserExist(relationship.User1.UserID) || !mp.validateUserExist(relationship.User2.UserID){
+	if !mp.validateUserExist(relationship.User1.UserID) || !mp.validateUserExist(relationship.User2.UserID) {
 		return data.ErrorUserNotFound
 	}
 	if relationship.User1.UserID == relationship.User2.UserID {
@@ -274,15 +274,15 @@ func (mp *MongoRelationships) validateUserExist(userID string) bool {
 func (mp *MongoRelationships) relationshipExist(id string, userID1 string, userID2 string) (bool, error) {
 	// MongoDB search filter
 	filter := bson.D{
-		{ 
-			Key:"$or", 
+		{
+			Key: "$or",
 			Value: bson.A{
 				bson.D{{Key: "user_1.user_id", Value: userID1}},
 				bson.D{{Key: "user_1.user_id", Value: userID2}},
-			}, 
+			},
 		},
 		{
-			Key: "$or", 
+			Key: "$or",
 			Value: bson.A{
 				bson.D{{Key: "user_2.user_id", Value: userID1}},
 				bson.D{{Key: "user_2.user_id", Value: userID2}},
@@ -309,8 +309,8 @@ func (mp *MongoRelationships) getConversationID(userID []string) (string, error)
 
 	jsonValue, _ := json.Marshal(values)
 
-	resp, err := http.Post(postConversationPath,"application/json", bytes.NewBuffer(jsonValue))
-	
+	resp, err := http.Post(postConversationPath, "application/json", bytes.NewBuffer(jsonValue))
+
 	body, _ := ioutil.ReadAll(resp.Body)
 	conversationID := ExtractValue(string(body), "id")
 
@@ -329,7 +329,7 @@ func ExtractValue(body string, key string) string {
 	return strings.ReplaceAll(keyValMatch[1], "\"", "")
 }
 
-func mongodbURI() string { 
+func mongodbURI() string {
 	hostname := os.Getenv("DB_HOSTNAME")
 	port := os.Getenv("DB_PORT")
 	username := os.Getenv("DB_USERNAME")
