@@ -17,6 +17,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.opentelemetry.io/contrib/instrumentation/go.mongodb.org/mongo-driver/mongo/otelmongo"
 )
 
 // ErrorEnvVar : Environment variable error
@@ -42,17 +43,19 @@ func (mp *MongoRelationships) Connect() error {
 	uri := mongodbURI()
 
 	// Setting client options
-	clientOptions := options.Client().ApplyURI(uri)
+	opts := options.Client()
+	clientOptions := opts.ApplyURI(uri)
+	opts.Monitor = otelmongo.NewMonitor()
 
 	// Connect to MongoDB
-	client, err := mongo.Connect(context.TODO(), clientOptions)
+	client, err := mongo.Connect(context.Background(), clientOptions)
 	if err != nil || client == nil {
 		log.Error(err, "Failed to connect to database. Shutting down service")
 		os.Exit(1)
 	}
 
 	// Ping DB
-	err = client.Ping(context.TODO(), nil)
+	err = client.Ping(context.Background(), nil)
 	if err != nil {
 		log.Error(err, "Failed to ping database. Shutting down service")
 		os.Exit(1)
@@ -69,17 +72,17 @@ func (mp *MongoRelationships) Connect() error {
 }
 
 func (mp *MongoRelationships) PingDB() error {
-	return mp.client.Ping(context.TODO(), nil)
+	return mp.client.Ping(context.Background(), nil)
 }
 
 func (mp *MongoRelationships) CloseDB() {
-	err := mp.client.Disconnect(context.TODO())
+	err := mp.client.Disconnect(context.Background())
 	if err != nil {
 		log.Error(err, "Error while disconnecting from database")
 	}
 }
 
-func (mp *MongoRelationships) GetFriendsListByUserID(userID string) (*data.Relationships, error) {
+func (mp *MongoRelationships) GetFriendsListByUserID(ctx context.Context, userID string) (*data.Relationships, error) {
 	// MongoDB search filter
 	filter := bson.D{{
 		Key: "$or",
@@ -105,13 +108,13 @@ func (mp *MongoRelationships) GetFriendsListByUserID(userID string) (*data.Relat
 	var friends data.Relationships
 
 	// Find returns a cursor that must be iterated through
-	cursor, err := mp.collection.Find(context.TODO(), filter)
+	cursor, err := mp.collection.Find(ctx, filter)
 	if err != nil {
 		log.Error(err, "Error getting friends from database")
 	}
 
 	// Iterating through cursor
-	for cursor.Next(context.TODO()) {
+	for cursor.Next(ctx) {
 		var result data.Relationship
 		err := cursor.Decode(&result)
 		if err != nil {
@@ -125,12 +128,12 @@ func (mp *MongoRelationships) GetFriendsListByUserID(userID string) (*data.Relat
 	}
 
 	// Close the cursor once finished
-	cursor.Close(context.TODO())
+	cursor.Close(ctx)
 
 	return &friends, err
 }
 
-func (mp *MongoRelationships) GetInvitesListByUserID(userID string) (*data.Relationships, error) {
+func (mp *MongoRelationships) GetInvitesListByUserID(ctx context.Context, userID string) (*data.Relationships, error) {
 	// MongoDB search filter
 	filter := bson.D{{
 		Key: "$or",
@@ -156,13 +159,13 @@ func (mp *MongoRelationships) GetInvitesListByUserID(userID string) (*data.Relat
 	var invites data.Relationships
 
 	// Find returns a cursor that must be iterated through
-	cursor, err := mp.collection.Find(context.TODO(), filter)
+	cursor, err := mp.collection.Find(ctx, filter)
 	if err != nil {
 		log.Error(err, "Error getting invites from database")
 	}
 
 	// Iterating through cursor
-	for cursor.Next(context.TODO()) {
+	for cursor.Next(ctx) {
 		var result data.Relationship
 		err := cursor.Decode(&result)
 		if err != nil {
@@ -176,12 +179,12 @@ func (mp *MongoRelationships) GetInvitesListByUserID(userID string) (*data.Relat
 	}
 
 	// Close the cursor once finished
-	cursor.Close(context.TODO())
+	cursor.Close(ctx)
 
 	return &invites, err
 }
 
-func (mp *MongoRelationships) UpdateRelationship(relationship *data.Relationship) error {
+func (mp *MongoRelationships) UpdateRelationship(ctx context.Context, relationship *data.Relationship) error {
 	err := mp.validateRelationship(relationship)
 	if err != nil {
 		return err
@@ -197,7 +200,7 @@ func (mp *MongoRelationships) UpdateRelationship(relationship *data.Relationship
 	update := bson.M{"$set": relationship}
 
 	// Update a single item in the database with the values in update that match the filter
-	_, err = mp.collection.UpdateOne(context.TODO(), filter, update)
+	_, err = mp.collection.UpdateOne(ctx, filter, update)
 	if err != nil {
 		log.Error(err, "Error updating relationship")
 	}
@@ -205,7 +208,7 @@ func (mp *MongoRelationships) UpdateRelationship(relationship *data.Relationship
 	return err
 }
 
-func (mp *MongoRelationships) AddRelationship(relationship *data.Relationship) error {
+func (mp *MongoRelationships) AddRelationship(ctx context.Context, relationship *data.Relationship) error {
 	err := mp.validateRelationship(relationship)
 	if err != nil {
 		return err
@@ -222,7 +225,7 @@ func (mp *MongoRelationships) AddRelationship(relationship *data.Relationship) e
 	relationship.UpdatedOn = time.Now().UTC().String()
 
 	// Inserting the new relationship into the database
-	insertResult, err := mp.collection.InsertOne(context.TODO(), relationship)
+	insertResult, err := mp.collection.InsertOne(ctx, relationship)
 	if err != nil {
 		return err
 	}
@@ -231,12 +234,12 @@ func (mp *MongoRelationships) AddRelationship(relationship *data.Relationship) e
 	return nil
 }
 
-func (mp *MongoRelationships) DeleteRelationship(id string) error {
+func (mp *MongoRelationships) DeleteRelationship(ctx context.Context, id string) error {
 	// MongoDB search filter
 	filter := bson.D{{Key: "_id", Value: id}}
 
 	// Delete a single item matching the filter
-	result, err := mp.collection.DeleteOne(context.TODO(), filter)
+	result, err := mp.collection.DeleteOne(ctx, filter)
 	if err != nil {
 		log.Error(err, "Error deleting relationship")
 	}
@@ -294,7 +297,7 @@ func (mp *MongoRelationships) relationshipExist(id string, userID1 string, userI
 	var result data.Relationship
 
 	// Find a single matching item from the database
-	err := mp.collection.FindOne(context.TODO(), filter).Decode(&result)
+	err := mp.collection.FindOne(context.Background(), filter).Decode(&result)
 
 	if err == mongo.ErrNoDocuments || result.ID == id {
 		return false, nil
