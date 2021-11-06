@@ -324,6 +324,22 @@ func (mp *MongoRelationships) getConversationID(userID []string) (string, error)
 	return conversationID, err
 }
 
+func deleteAllRelationshipsFromMongoDB() error {
+	uri := mongodbURI()
+
+	// Setting client options
+	opts := options.Client()
+	clientOptions := opts.ApplyURI(uri)
+	client, err := mongo.Connect(context.Background(), clientOptions)
+	if err != nil || client == nil {
+		log.Error(err, "Failed to connect to database. Failing test")
+		return err
+	}
+	collection := client.Database("ubivius").Collection("relationships")
+	_, err = collection.DeleteMany(context.Background(), bson.D{{}})
+	return err
+}
+
 // extracts the value for a key from a JSON-formatted string
 // body - the JSON-response as a string. Usually retrieved via the request body
 // key - the key for which the value should be extracted
