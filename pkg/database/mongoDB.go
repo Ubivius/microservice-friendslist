@@ -200,9 +200,13 @@ func (mp *MongoRelationships) UpdateRelationship(ctx context.Context, relationsh
 	update := bson.M{"$set": relationship}
 
 	// Update a single item in the database with the values in update that match the filter
-	_, err = mp.collection.UpdateOne(ctx, filter, update)
+	updateResult, err := mp.collection.UpdateOne(ctx, filter, update)
 	if err != nil {
 		log.Error(err, "Error updating relationship")
+	}
+	if updateResult.MatchedCount != 1 {
+		log.Error(data.ErrorRelationshipNotFound, "No matches found for update")
+		return err
 	}
 
 	return err
