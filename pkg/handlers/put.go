@@ -4,15 +4,18 @@ import (
 	"net/http"
 
 	"github.com/Ubivius/microservice-friendslist/pkg/data"
+	"go.opentelemetry.io/otel"
 )
 
 // UpdateRelationships updates the relationship with the ID specified in the received JSON relationship
 func (relationshipHandler *RelationshipsHandler) UpdateRelationships(responseWriter http.ResponseWriter, request *http.Request) {
+	_, span := otel.Tracer("friendslist").Start(request.Context(), "updateRelationships")
+	defer span.End()
 	relationship := request.Context().Value(KeyRelationship{}).(*data.Relationship)
 	log.Info("UpdateRelationships request", "id", relationship.ID)
 
 	// Update relationship
-	err := relationshipHandler.db.UpdateRelationship(relationship)
+	err := relationshipHandler.db.UpdateRelationship(request.Context(), relationship)
 	switch err {
 	case nil:
 		responseWriter.WriteHeader(http.StatusNoContent)

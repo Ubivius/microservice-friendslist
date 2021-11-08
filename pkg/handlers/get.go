@@ -5,15 +5,18 @@ import (
 	"net/http"
 
 	"github.com/Ubivius/microservice-friendslist/pkg/data"
+	"go.opentelemetry.io/otel"
 )
 
 // GetFriendsListByUserID returns all the relationships of a user from the database
 func (relationshipHandler *RelationshipsHandler) GetFriendsListByUserID(responseWriter http.ResponseWriter, request *http.Request) {
+	_, span := otel.Tracer("friendslist").Start(request.Context(), "getFriendsListByUserID")
+	defer span.End()
 	id := getUserID(request)
 
-	log.Info("GetFriendsListByUserID request for userID","id", id)
+	log.Info("GetFriendsListByUserID request for userID", "id", id)
 
-	friends, err := relationshipHandler.db.GetFriendsListByUserID(id)
+	friends, err := relationshipHandler.db.GetFriendsListByUserID(request.Context(), id)
 	switch err {
 	case nil:
 		err = json.NewEncoder(responseWriter).Encode(friends)
@@ -35,11 +38,13 @@ func (relationshipHandler *RelationshipsHandler) GetFriendsListByUserID(response
 
 // GetInvitesListByUserID returns all the invites of a user from the database
 func (relationshipHandler *RelationshipsHandler) GetInvitesListByUserID(responseWriter http.ResponseWriter, request *http.Request) {
+	_, span := otel.Tracer("friendslist").Start(request.Context(), "getInvitesListByUserId")
+	defer span.End()
 	id := getUserID(request)
 
-	log.Info("GetInvitesListByUserID request for userID","id", id)
+	log.Info("GetInvitesListByUserID request for userID", "id", id)
 
-	invites, err := relationshipHandler.db.GetInvitesListByUserID(id)
+	invites, err := relationshipHandler.db.GetInvitesListByUserID(request.Context(), id)
 	switch err {
 	case nil:
 		err = json.NewEncoder(responseWriter).Encode(invites)
@@ -56,5 +61,4 @@ func (relationshipHandler *RelationshipsHandler) GetInvitesListByUserID(response
 		http.Error(responseWriter, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
 }

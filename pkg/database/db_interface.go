@@ -1,20 +1,18 @@
 package database
 
 import (
+	"context"
+
 	"github.com/Ubivius/microservice-friendslist/pkg/data"
 )
 
 // The interface that any kind of database must implement
 type RelationshipDB interface {
-	GetFriendsListByUserID(userID string) (*data.Relationships, error)
-	GetInvitesListByUserID(userID string) (*data.Relationships, error)
-	UpdateRelationship(relationship *data.Relationship) error
-	AddRelationship(relationship *data.Relationship) error
-	DeleteRelationship(id string) error
-	validateRelationship(relationship *data.Relationship) error
-	relationshipExist(id string, userID1 string, userID2 string) (bool, error)
-	validateUserExist(userID string) bool
-	getConversationID(userID []string) (string, error)
+	GetFriendsListByUserID(ctx context.Context, userID string) (*data.Relationships, error)
+	GetInvitesListByUserID(ctx context.Context, userID string) (*data.Relationships, error)
+	UpdateRelationship(ctx context.Context, relationship *data.Relationship) error
+	AddRelationship(ctx context.Context, relationship *data.Relationship) error
+	DeleteRelationship(ctx context.Context, id string) error
 	Connect() error
 	PingDB() error
 	CloseDB()

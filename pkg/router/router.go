@@ -4,13 +4,17 @@ import (
 	"net/http"
 
 	"github.com/Ubivius/microservice-friendslist/pkg/handlers"
+	"github.com/Ubivius/pkg-telemetry/metrics"
 	"github.com/gorilla/mux"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux"
 )
 
 // New : Mux route handling with gorilla/mux
 func New(relationshipHandler *handlers.RelationshipsHandler) *mux.Router {
 	log.Info("Starting router")
 	router := mux.NewRouter()
+	router.Use(otelmux.Middleware("friendslist"))
+	router.Use(metrics.RequestCountMiddleware)
 
 	// Get Router
 	getRouter := router.Methods(http.MethodGet).Subrouter()
