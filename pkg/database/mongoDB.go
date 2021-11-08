@@ -200,9 +200,13 @@ func (mp *MongoRelationships) UpdateRelationship(ctx context.Context, relationsh
 	update := bson.M{"$set": relationship}
 
 	// Update a single item in the database with the values in update that match the filter
-	_, err = mp.collection.UpdateOne(ctx, filter, update)
+	updateResult, err := mp.collection.UpdateOne(ctx, filter, update)
 	if err != nil {
 		log.Error(err, "Error updating relationship")
+	}
+	if updateResult.MatchedCount != 1 {
+		log.Error(data.ErrorRelationshipNotFound, "No matches found for update")
+		return err
 	}
 
 	return err
@@ -318,6 +322,22 @@ func (mp *MongoRelationships) getConversationID(userID []string) (string, error)
 	conversationID := ExtractValue(string(body), "id")
 
 	return conversationID, err
+}
+
+func deleteAllRelationshipsFromMongoDB() error {
+	uri := mongodbURI()
+
+	// Setting client options
+	opts := options.Client()
+	clientOptions := opts.ApplyURI(uri)
+	client, err := mongo.Connect(context.Background(), clientOptions)
+	if err != nil || client == nil {
+		log.Error(err, "Failed to connect to database. Failing test")
+		return err
+	}
+	collection := client.Database("ubivius").Collection("relationships")
+	_, err = collection.DeleteMany(context.Background(), bson.D{{}})
+	return err
 }
 
 // extracts the value for a key from a JSON-formatted string
