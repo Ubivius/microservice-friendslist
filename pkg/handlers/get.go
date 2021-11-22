@@ -19,12 +19,7 @@ func (relationshipHandler *RelationshipsHandler) GetFriendsListByUserID(response
 	friends, err := relationshipHandler.db.GetFriendsListByUserID(request.Context(), id)
 	switch err {
 	case nil:
-		detailedFriends, err := GetUserDetails(id, *friends)
-		if err != nil {
-			log.Error(err, "Error fetching users details")
-		}
-
-		err = json.NewEncoder(responseWriter).Encode(detailedFriends)
+		err = json.NewEncoder(responseWriter).Encode(friends)
 		if err != nil {
 			log.Error(err, "Error serializing friends")
 		}
@@ -52,12 +47,7 @@ func (relationshipHandler *RelationshipsHandler) GetInvitesListByUserID(response
 	invites, err := relationshipHandler.db.GetInvitesListByUserID(request.Context(), id)
 	switch err {
 	case nil:
-		detailedInvites, err := GetUserDetails(id, *invites)
-		if err != nil {
-			log.Error(err, "Error fetching users details")
-		}
-
-		err = json.NewEncoder(responseWriter).Encode(detailedInvites)
+		err = json.NewEncoder(responseWriter).Encode(invites)
 		if err != nil {
 			log.Error(err, "Error serializing invites")
 		}
@@ -71,50 +61,4 @@ func (relationshipHandler *RelationshipsHandler) GetInvitesListByUserID(response
 		http.Error(responseWriter, err.Error(), http.StatusInternalServerError)
 		return
 	}
-}
-
-func GetUserDetails(userID string, relations data.Relationships) (*data.DetailedRelationships, error){
-	detailedRelationsList := data.DetailedRelationships{}
-
-	for _, relation := range relations{
-		userIDToFetch := relation.User1.UserID
-		relationshipType := relation.User1.RelationshipType
-
-		if(userID == relation.User1.UserID){
-			userIDToFetch = relation.User2.UserID
-			relationshipType = relation.User2.RelationshipType
-		}
-
-		detailedUser, err := GetUserByID(userIDToFetch)
-		if (err != nil){
-			return nil, err
-		}
-		detailedUser.RelationshipType = relationshipType
-
-		detailedRelationship := data.DetailedRelationship{
-			ID: relation.ID,
-			User: *detailedUser,
-			ConversationID: relation.ConversationID,
-			CreatedOn: relation.CreatedOn,
-			UpdatedOn: relation.UpdatedOn,
-		}
-		detailedRelationsList = append(detailedRelationsList, &detailedRelationship)
-	}
-	return &detailedRelationsList, nil
-}
-
-func GetUserByID(userID string) (*data.DetailedUser, error) {
-	getUserByIDPath := data.MicroserviceUserPath + "/users/" + userID
-	resp, err := http.Get(getUserByIDPath)
-	if err != nil {
-		return nil, err
-	}
-
-	detailedUser := &data.DetailedUser{}
-	err = json.NewDecoder(resp.Body).Decode(detailedUser)
-	if err != nil {
-		return nil, err
-	}
-
-	return detailedUser, nil
 }

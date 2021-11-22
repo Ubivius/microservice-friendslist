@@ -29,24 +29,32 @@ func (mp *MockRelationships) CloseDB() {
 	log.Info("Mocked DB connection closed")
 }
 
-func (mp *MockRelationships) GetFriendsListByUserID(ctx context.Context, userID string) (*data.Relationships, error) {
+func (mp *MockRelationships) GetFriendsListByUserID(ctx context.Context, userID string) (*data.DetailedRelationships, error) {
 	_, span := otel.Tracer("friendslist").Start(ctx, "getFriendsListByUserIdDatabase")
 	defer span.End()
 	friendsList := findFriendsListByUserID(userID)
 	if len(friendsList) == 0 {
 		return nil, data.ErrorRelationshipNotFound
 	}
-	return &friendsList, nil
+	detailedFriends, err := mp.GetUserDetails(userID, friendsList)
+	if err != nil {
+		log.Error(err, "Error fetching users details")
+	}
+	return detailedFriends, nil
 }
 
-func (mp *MockRelationships) GetInvitesListByUserID(ctx context.Context, userID string) (*data.Relationships, error) {
+func (mp *MockRelationships) GetInvitesListByUserID(ctx context.Context, userID string) (*data.DetailedRelationships, error) {
 	_, span := otel.Tracer("friendslist").Start(ctx, "getFriendsRequestsByUserIdDatabase")
 	defer span.End()
 	invitesList := findInvitesListByUserID(userID)
 	if len(invitesList) == 0 {
 		return nil, data.ErrorRelationshipNotFound
 	}
-	return &invitesList, nil
+	detailedInvites, err := mp.GetUserDetails(userID, invitesList)
+	if err != nil {
+		log.Error(err, "Error fetching users details")
+	}
+	return detailedInvites, nil
 }
 
 func (mp *MockRelationships) UpdateRelationship(ctx context.Context, relationship *data.Relationship) error {
@@ -166,6 +174,40 @@ func (mp *MockRelationships) relationshipExist(id string, userID1 string, userID
 
 func (mp *MockRelationships) getConversationID(userID []string) (string, error) {
 	return uuid.NewString(), nil
+}
+
+func (mp *MockRelationships) GetUserDetails(userID string, relations data.Relationships) (*data.DetailedRelationships, error) {
+	detailedRelationsList := data.DetailedRelationships{}
+
+	for _, relation := range relations{
+		userIDToFetch := relation.User1.UserID
+		relationshipType := relation.User1.RelationshipType
+
+		if(userID == relation.User1.UserID){
+			userIDToFetch = relation.User2.UserID
+			relationshipType = relation.User2.RelationshipType
+		}
+
+		detailedUser, err := mp.GetUserByID(userIDToFetch)
+		if (err != nil){
+			return nil, err
+		}
+		detailedUser.RelationshipType = relationshipType
+
+		detailedRelationship := data.DetailedRelationship{
+			ID: relation.ID,
+			User: *detailedUser,
+			ConversationID: relation.ConversationID,
+			CreatedOn: relation.CreatedOn,
+			UpdatedOn: relation.UpdatedOn,
+		}
+		detailedRelationsList = append(detailedRelationsList, &detailedRelationship)
+	}
+	return &detailedRelationsList, nil
+}
+
+func (mp *MockRelationships) GetUserByID(userID string) (*data.DetailedUser, error){
+	return &data.DetailedUser{ID: userID, Username: "Test", Status: "Online", RelationshipType: data.Friend}, nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////
