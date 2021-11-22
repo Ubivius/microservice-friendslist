@@ -40,8 +40,8 @@ type Relationship struct {
 
 // User in a relationship
 type User struct {
-	UserID      		string  	     	`json:"user_id" bson:"user_id" validate:"required"`
-	RelationshipType	RelationshipType	`json:"relationship_type" bson:"relationship_type" validate:"required,isRelationshipType"`
+	UserID           string           `json:"user_id" bson:"user_id" validate:"required"`
+	RelationshipType RelationshipType `json:"relationship_type" bson:"relationship_type" validate:"required,isRelationshipType"`
 }
 
 // Detailed Relationship defines the structure for an API relationship with detailed user.
@@ -55,10 +55,10 @@ type DetailedRelationship struct {
 
 // Detailed User in a relationship
 type DetailedUser struct {
-	ID               string  	     	`json:"id" bson:"_id"`
-	Username         string  	     	`json:"username"`
-	Status           string  	     	`json:"status"`
-	RelationshipType RelationshipType	`json:"relationship_type" bson:"relationship_type"`
+	ID               string  	      `json:"id" bson:"_id"`
+	Username         string  	      `json:"username"`
+	Status           string  	      `json:"status"`
+	RelationshipType RelationshipType `json:"relationship_type" bson:"relationship_type"`
 }
 
 // Relationships is a collection of Relationship
