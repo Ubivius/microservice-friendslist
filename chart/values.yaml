@@ -95,7 +95,7 @@ ingress:
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   hosts:
-    - host: friendslist.dev.ubivius.tk
+    - host: friendslist.player.dev.ubivius.tk
       paths:
         - path: /
   tls: []
