@@ -4,14 +4,17 @@ import (
 	"net/http"
 
 	"github.com/Ubivius/microservice-friendslist/pkg/data"
+	"go.opentelemetry.io/otel"
 )
 
 // AddRelationship creates a new relationship from the received JSON
 func (relationshipHandler *RelationshipsHandler) AddRelationship(responseWriter http.ResponseWriter, request *http.Request) {
+	_, span := otel.Tracer("friendslist").Start(request.Context(), "addRelationship")
+	defer span.End()
 	log.Info("AddRelationship request")
 	relationship := request.Context().Value(KeyRelationship{}).(*data.Relationship)
 
-	err := relationshipHandler.db.AddRelationship(relationship)
+	err := relationshipHandler.db.AddRelationship(request.Context(), relationship)
 	switch err {
 	case nil:
 		responseWriter.WriteHeader(http.StatusNoContent)

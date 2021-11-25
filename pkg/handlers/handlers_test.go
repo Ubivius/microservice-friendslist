@@ -33,7 +33,7 @@ func TestGetExistingFriendsListByUserID(t *testing.T) {
 	if response.Code != http.StatusOK {
 		t.Errorf("Expected status code %d but got : %d", http.StatusOK, response.Code)
 	}
-	if !strings.Contains(response.Body.String(), "\"user_id\":\"a2181017-5c53-422b-b6bc-036b27c04fc8\"") && !strings.Contains(response.Body.String(), "\"relationship_type\":\"Friend\"") {
+	if !strings.Contains(response.Body.String(), "\"id\":\"f171ea04-8a77-11eb-8dcd-0242ac130003\"") && !strings.Contains(response.Body.String(), "\"relationship_type\":\"Friend\"") {
 		t.Error("Missing elements from expected results")
 	}
 }
@@ -77,7 +77,7 @@ func TestGetExistingInvitesListByUserID(t *testing.T) {
 	if response.Code != http.StatusOK {
 		t.Errorf("Expected status code %d but got : %d", http.StatusOK, response.Code)
 	}
-	if !strings.Contains(response.Body.String(), "\"user_id\":\"e2382ea2-b5fa-4506-aa9d-d338aa52af44\"") && !strings.Contains(response.Body.String(), "\"relationship_type\":\"PendingIncoming\"") {
+	if !strings.Contains(response.Body.String(), "\"id\":\"e2382ea2-b5fa-4506-aa9d-d338aa52af44\"") && !strings.Contains(response.Body.String(), "\"relationship_type\":\"PendingIncoming\"") {
 		t.Error("Missing elements from expected results")
 	}
 }
