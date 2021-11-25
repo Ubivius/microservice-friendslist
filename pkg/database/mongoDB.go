@@ -82,7 +82,7 @@ func (mp *MongoRelationships) CloseDB() {
 	}
 }
 
-func (mp *MongoRelationships) GetFriendsListByUserID(ctx context.Context, userID string) (*data.Relationships, error) {
+func (mp *MongoRelationships) GetFriendsListByUserID(ctx context.Context, userID string) (*data.DetailedRelationships, error) {
 	// MongoDB search filter
 	filter := bson.D{{
 		Key: "$or",
@@ -130,10 +130,15 @@ func (mp *MongoRelationships) GetFriendsListByUserID(ctx context.Context, userID
 	// Close the cursor once finished
 	cursor.Close(ctx)
 
-	return &friends, err
+	detailedFriends, err := mp.GetUserDetails(userID, friends)
+	if err != nil {
+		log.Error(err, "Error fetching users details")
+	}
+
+	return detailedFriends, err
 }
 
-func (mp *MongoRelationships) GetInvitesListByUserID(ctx context.Context, userID string) (*data.Relationships, error) {
+func (mp *MongoRelationships) GetInvitesListByUserID(ctx context.Context, userID string) (*data.DetailedRelationships, error) {
 	// MongoDB search filter
 	filter := bson.D{{
 		Key: "$or",
@@ -181,7 +186,12 @@ func (mp *MongoRelationships) GetInvitesListByUserID(ctx context.Context, userID
 	// Close the cursor once finished
 	cursor.Close(ctx)
 
-	return &invites, err
+	detailedInvites, err := mp.GetUserDetails(userID, invites)
+	if err != nil {
+		log.Error(err, "Error fetching users details")
+	}
+
+	return detailedInvites, err
 }
 
 func (mp *MongoRelationships) UpdateRelationship(ctx context.Context, relationship *data.Relationship) error {
@@ -364,4 +374,50 @@ func mongodbURI() string {
 	}
 
 	return "mongodb://" + username + ":" + password + "@" + hostname + ":" + port + "/?authSource=admin"
+}
+
+func (mp *MongoRelationships) GetUserDetails(userID string, relations data.Relationships) (*data.DetailedRelationships, error){
+	detailedRelationsList := data.DetailedRelationships{}
+
+	for _, relation := range relations{
+		userIDToFetch := relation.User1.UserID
+		relationshipType := relation.User1.RelationshipType
+
+		if(userID == relation.User1.UserID){
+			userIDToFetch = relation.User2.UserID
+			relationshipType = relation.User2.RelationshipType
+		}
+
+		detailedUser, err := mp.GetUserByID(userIDToFetch)
+		if (err != nil){
+			return nil, err
+		}
+		detailedUser.RelationshipType = relationshipType
+
+		detailedRelationship := data.DetailedRelationship{
+			ID: relation.ID,
+			User: *detailedUser,
+			ConversationID: relation.ConversationID,
+			CreatedOn: relation.CreatedOn,
+			UpdatedOn: relation.UpdatedOn,
+		}
+		detailedRelationsList = append(detailedRelationsList, &detailedRelationship)
+	}
+	return &detailedRelationsList, nil
+}
+
+func (mp *MongoRelationships) GetUserByID(userID string) (*data.DetailedUser, error) {
+	getUserByIDPath := data.MicroserviceUserPath + "/users/" + userID
+	resp, err := http.Get(getUserByIDPath)
+	if err != nil {
+		return nil, err
+	}
+
+	detailedUser := &data.DetailedUser{}
+	err = json.NewDecoder(resp.Body).Decode(detailedUser)
+	if err != nil {
+		return nil, err
+	}
+
+	return detailedUser, nil
 }
