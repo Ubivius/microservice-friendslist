@@ -34,18 +34,38 @@ type Relationship struct {
 	User1          User   `json:"user_1" bson:"user_1"`
 	User2          User   `json:"user_2" bson:"user_2"`
 	ConversationID string `json:"conversation_id" bson:"conversation_id"`
-	CreatedOn      string `json:"-"`
-	UpdatedOn      string `json:"-"`
+	CreatedOn      string `json:"created_on" bson:"created_on"`
+	UpdatedOn      string `json:"updated_on" bson:"updated_on"`
 }
 
 // User in a relationship
 type User struct {
-	UserID      		string  	     	`json:"user_id" bson:"user_id" validate:"required"`
-	RelationshipType	RelationshipType	`json:"relationship_type" bson:"relationship_type" validate:"required,isRelationshipType"`
+	UserID           string           `json:"user_id" bson:"user_id" validate:"required"`
+	RelationshipType RelationshipType `json:"relationship_type" bson:"relationship_type" validate:"required,isRelationshipType"`
+}
+
+// Detailed Relationship defines the structure for an API relationship with detailed user.
+type DetailedRelationship struct {
+	ID             string       `json:"id" bson:"_id"`
+	User           DetailedUser `json:"user"`
+	ConversationID string       `json:"conversation_id" bson:"conversation_id"`
+	CreatedOn      string       `json:"created_on" bson:"created_on"`
+	UpdatedOn      string       `json:"updated_on" bson:"created_on"`
+}
+
+// Detailed User in a relationship
+type DetailedUser struct {
+	ID               string  	      `json:"id" bson:"_id"`
+	Username         string  	      `json:"username"`
+	Status           string  	      `json:"status"`
+	RelationshipType RelationshipType `json:"relationship_type" bson:"relationship_type"`
 }
 
 // Relationships is a collection of Relationship
 type Relationships []*Relationship
+
+// Detailed Relationships is a collection of Detailed Relationship
+type DetailedRelationships []*DetailedRelationship
 
 const MicroserviceUserPath = "http://microservice-user:9090"
 const MicroserviceTextChatPath = "http://microservice-text-chat:9090"
